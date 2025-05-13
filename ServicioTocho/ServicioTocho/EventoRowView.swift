@@ -12,8 +12,7 @@ struct EventoRowView: View {
 
     var body: some View {
         HStack {
-            // Podríamos añadir un icono o imagen representativa del tipo de evento aquí
-            Image(systemName: iconoParaTipo(evento.tipo)) // Usaremos SFSymbols
+            Image(systemName: iconoParaTipo(evento.tipo))
                 .font(.title2)
                 .frame(width: 40)
                 .foregroundColor(colorParaTipo(evento.tipo))
@@ -28,9 +27,9 @@ struct EventoRowView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            Spacer() // Empuja todo a la izquierda
+            Spacer()
         }
-        .padding(.vertical, 8) // Un poco de espacio vertical
+        .padding(.vertical, 8)
     }
 
     // Funciones helper para el icono y color según el tipo
