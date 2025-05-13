@@ -1,3 +1,11 @@
+//
+//  RegistroHora.swift
+//  ServicioTocho
+//
+//  Created by CETYS Universidad  on 12/05/25.
+//
+
+
 import Foundation
 
 struct RegistroHora: Identifiable, Codable {

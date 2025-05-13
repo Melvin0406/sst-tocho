@@ -1,3 +1,11 @@
+//
+//  Usuario.swift
+//  ServicioTocho
+//
+//  Created by CETYS Universidad  on 12/05/25.
+//
+
+
 import SwiftUI // O Foundation
 
 struct Usuario: Identifiable, Codable {
