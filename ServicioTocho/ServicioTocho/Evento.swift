@@ -18,7 +18,7 @@ struct Evento: Identifiable, Codable { // Codable será útil para persistencia 
     var ubicacionNombre: String
     var latitud: Double
     var longitud: Double
-    var organizador: String? // Opcional
+    var organizador: String // Opcional
     var cupoMaximo: Int? // Opcional
     // Podríamos añadir más adelante: var participantesInscritos: [String]? o [Usuario.ID]?
 
