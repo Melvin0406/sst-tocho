@@ -10,32 +10,48 @@ import SwiftUI
 
 struct ProfileView: View {
     @ObservedObject var authViewModel: AuthenticationViewModel
-    // Para cerrar esta vista modalmente si se presenta como .sheet, o para pop en NavigationStack
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        NavigationView { // Opcional si ya estás dentro de una NavigationView, pero bueno para el título
-            VStack {
-                Text("Perfil del Usuario") // Placeholder para más contenido del perfil
+        // La NavigationView aquí es para el título de ProfileView y su propio estilo de barra
+        NavigationView {
+            VStack(alignment: .leading, spacing: 15) { // Alineación a la izquierda
+                Text("Mi Perfil")
                     .font(.largeTitle)
-                    .padding()
+                    .padding(.bottom)
 
-                if let email = authViewModel.emailForProfile() { // Usaremos una función para obtener el email
-                    Text("Correo: \(email)")
-                        .padding()
-                } else if let user = authViewModel.currentUser() {
-                    Text("UID: \(user.uid)")
-                        .padding()
+                if let username = authViewModel.usernameForProfile() { // Usamos la nueva función
+                    HStack {
+                        Text("Nombre de Usuario:").bold()
+                        Text(username)
+                    }
+                } else {
+                    HStack {
+                        Text("Nombre de Usuario:").bold()
+                        Text("No disponible")
+                    }
                 }
 
+                if let email = authViewModel.emailForProfile() {
+                    HStack {
+                        Text("Correo:").bold()
+                        Text(email)
+                    }
+                }
 
-                Spacer() // Empuja el botón hacia abajo
+                // Si quieres mostrar el UID (usualmente para depuración)
+                // if let user = authViewModel.currentUser() {
+                //     HStack {
+                //        Text("UID:").bold()
+                //        Text(user.uid).font(.caption)
+                //     }
+                // }
+
+                Spacer()
 
                 Button(action: {
                     authViewModel.signOut()
-                    // No es necesario llamar a dismiss() aquí si AuthManagerView maneja el cambio de vista
-                    // cuando userIsLoggedIn cambia a false.
-                    // Si ProfileView se presentara como una modal (.sheet), aquí podrías llamar a dismiss().
+                    // AuthManagerView se encargará de la navegación
                 }) {
                     Text("Cerrar Sesión")
                         .foregroundColor(.white)
@@ -44,29 +60,24 @@ struct ProfileView: View {
                         .background(Color.red)
                         .cornerRadius(10)
                 }
-                .padding()
             }
-            .navigationTitle("Mi Perfil")
-            .navigationBarTitleDisplayMode(.inline) // O .large
-            // Opcional: botón para cerrar si se presenta como sheet y no en NavigationView
-            // .toolbar {
-            //     ToolbarItem(placement: .navigationBarLeading) {
-            //         Button("Cerrar") {
-            //             dismiss()
-            //         }
-            //     }
-            // }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading) // Para que el VStack ocupe el ancho
+            .navigationTitle("Detalles del Perfil") // Título de la barra de navegación
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        // Creamos una instancia de mock para la preview
-        let mockAuthViewModel = AuthenticationViewModel()
-        // Opcionalmente, simula un usuario logueado para la preview
-        // Esto es más complejo de simular directamente sin un login real en preview,
-        // pero podemos pasar un ViewModel básico.
-        ProfileView(authViewModel: mockAuthViewModel)
+        let mockAuthVM = AuthenticationViewModel()
+        // Para la preview, podrías simular un UID y guardar un username de prueba
+        // if let testUID = "previewUID123" {
+        //     UserDefaults.standard.set("UsuarioPreview", forKey: "\(mockAuthVM.userPreferencesKeyPrefix)username_\(testUID)")
+        //     // Luego necesitarías una forma de que mockAuthVM.currentUser() devuelva un User con ese UID.
+        //     // Es más fácil probar esto en el flujo real de la app.
+        // }
+        ProfileView(authViewModel: mockAuthVM)
     }
 }

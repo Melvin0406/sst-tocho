@@ -48,20 +48,17 @@ struct LoginView: View {
                         .cornerRadius(8)
                 }
 
-                Button(action: {
-                    authViewModel.signUp()
-                }) {
-                    Text("Crear Cuenta Nueva")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .cornerRadius(8)
+                // Enlace para ir a la pantalla de registro
+                NavigationLink(destination: SignUpView()) {
+                    // SignUpView crea su propio authViewModel
+                    Text("¿No tienes cuenta? Regístrate")
+                        .padding(.top)
                 }
+                    // El botón de "Crear Cuenta Nueva" que estaba aquí antes se elimina si lo tenías.
                 Spacer()
             }
             .padding()
-            // .navigationTitle("Acceso") // Descomenta si usas NavigationView y quieres título
+            .navigationTitle("Acceso")
         }
         // La siguiente línea es importante: si el usuario se loguea/registra
         // y userIsLoggedIn cambia en el ViewModel, esta vista no desaparecerá
