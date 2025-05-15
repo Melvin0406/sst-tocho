@@ -38,6 +38,7 @@ struct EventoDetalleView: View {
                 // Información general en una sola tarjeta
                 VStack(alignment: .leading, spacing: 10) {
                     InfoRow(label: "Organizador", value: evento.organizador)
+                    InfoRow(label: "Horas a liberar", value: evento.horasLiberadas.map(\.description) ?? "N/A")
                     InfoRow(label: "Tipo", value: evento.tipo)
                     InfoRow(label: "Ubicación", value: evento.ubicacionNombre)
                     InfoRow(label: "Inicio", value: formatearFecha(evento.fechaInicio))

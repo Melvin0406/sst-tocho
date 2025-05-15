@@ -20,7 +20,8 @@ let mockEventos: [Evento] = [
         latitud: 31.8639, // Coordenadas de ejemplo
         longitud: -116.6067,
         organizador: "ONG Mar Limpio",
-        cupoMaximo: 50
+        cupoMaximo: 50,
+        horasLiberadas: 10
     ),
     Evento(
         nombre: "Colecta de Alimentos No Perecederos",
@@ -32,7 +33,8 @@ let mockEventos: [Evento] = [
         latitud: 32.5029, // Coordenadas de ejemplo para Tijuana
         longitud: -116.9732,
         organizador: "Fundación Ayuda Local",
-        cupoMaximo: nil // Sin cupo máximo
+        cupoMaximo: nil, // Sin cupo máximo
+        horasLiberadas: 20
     ),
     Evento(
         nombre: "Taller de Lectura para Niños",
@@ -44,7 +46,8 @@ let mockEventos: [Evento] = [
         latitud: 32.5271, // Coordenadas de ejemplo para Tijuana
         longitud: -117.0201,
         organizador: "Amigos de la Biblioteca",
-        cupoMaximo: 20
+        cupoMaximo: 20,
+        horasLiberadas: 30
     ),
     Evento(
         nombre: "Reforestación Parque Morelos",
@@ -56,6 +59,7 @@ let mockEventos: [Evento] = [
         latitud: 32.4858,
         longitud: -116.9300,
         organizador: "Ciudad Verde AC",
-        cupoMaximo: 100
+        cupoMaximo: 100,
+        horasLiberadas: 20
     )
 ]

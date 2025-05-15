@@ -19,8 +19,8 @@ struct Evento: Identifiable, Codable { // Codable será útil para persistencia 
     var latitud: Double
     var longitud: Double
     var organizador: String // Opcional
-    var cupoMaximo: Int? // Opcional
-    // Podríamos añadir más adelante: var participantesInscritos: [String]? o [Usuario.ID]?
+    var cupoMaximo: Int? 
+    var horasLiberadas: Int?
 
     // Para MapKit, podemos tener una propiedad computada para CLLocationCoordinate2D
     var coordinate: CLLocationCoordinate2D {
