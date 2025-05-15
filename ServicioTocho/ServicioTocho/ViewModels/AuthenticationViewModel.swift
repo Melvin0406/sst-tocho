@@ -1,3 +1,11 @@
+//
+//  AuthenticationViewModel.swift
+//  ServicioTocho
+//
+//  Created by CETYS Universidad  on 14/05/25.
+//
+
+
 import Foundation
 import FirebaseAuth // Importa FirebaseAuth
 

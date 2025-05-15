@@ -9,6 +9,7 @@ import SwiftUI
 
 struct EventosListView: View {
     @State var eventos: [Evento] = mockEventos
+    @ObservedObject var authViewModel: AuthenticationViewModel
 
     var body: some View {
         NavigationView {
@@ -24,6 +25,6 @@ struct EventosListView: View {
 
 struct EventosListView_Previews: PreviewProvider {
     static var previews: some View {
-        EventosListView()
+        EventosListView(authViewModel: AuthenticationViewModel())
     }
 }

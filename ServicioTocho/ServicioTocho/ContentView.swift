@@ -8,8 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
+    // ContentView ahora también necesita un AuthenticationViewModel para pasárselo a EventosListView
+    @StateObject private var authViewModel = AuthenticationViewModel()
+
     var body: some View {
-        EventosListView()
+        // Pasamos la instancia de authViewModel a EventosListView
+        EventosListView(authViewModel: authViewModel)
     }
 }
 

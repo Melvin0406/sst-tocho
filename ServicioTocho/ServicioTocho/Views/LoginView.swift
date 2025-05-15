@@ -1,7 +1,15 @@
+//
+//  LoginView.swift
+//  ServicioTocho
+//
+//  Created by CETYS Universidad  on 14/05/25.
+//
+
+
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var authViewModel = AuthenticationViewModel()
+    @ObservedObject var authViewModel: AuthenticationViewModel
 
     var body: some View {
         NavigationView { // Opcional, pero útil si quieres un título o botones en la barra
@@ -63,6 +71,6 @@ struct LoginView: View {
 
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
-        LoginView()
+        LoginView(authViewModel: AuthenticationViewModel())
     }
 }
