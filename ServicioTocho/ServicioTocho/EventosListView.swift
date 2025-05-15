@@ -8,7 +8,7 @@ import SwiftUI
 
 struct EventosListView: View {
     @State var eventos: [Evento] = mockEventos
-    @StateObject var filtro = EventoFiltro()
+    @StateObject var filtro = EventoFiltro() // Asumo que EventoFiltro es un ObservableObject
     @State private var eventosUnidos: Set<UUID> = []
     @State private var mostrarFiltro = false
     @ObservedObject var authViewModel: AuthenticationViewModel
@@ -31,12 +31,22 @@ struct EventosListView: View {
     var body: some View {
         NavigationView {
             List(eventosFiltrados) { evento in
+                // Asumo que EventoDetalleView también necesita authViewModel si realiza acciones de usuario
                 NavigationLink(destination: EventoDetalleView(evento: evento, eventosUnidos: $eventosUnidos)) {
                     EventoRowView(evento: evento)
                 }
             }
             .navigationTitle("Próximos Eventos")
             .toolbar {
+                // Botón de Perfil a la izquierda
+                ToolbarItem(placement: .navigationBarLeading) {
+                    NavigationLink(destination: ProfileView(authViewModel: authViewModel)) {
+                        Image(systemName: "person.circle")
+                            .imageScale(.large)
+                    }
+                }
+
+                // Botón de Filtro a la derecha (como ya lo tenías)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         mostrarFiltro = true
@@ -47,6 +57,7 @@ struct EventosListView: View {
                 }
             }
             .sheet(isPresented: $mostrarFiltro) {
+                // Asumo que FiltroEventosView es una vista que definiste
                 FiltroEventosView(filtro: filtro)
             }
         }
