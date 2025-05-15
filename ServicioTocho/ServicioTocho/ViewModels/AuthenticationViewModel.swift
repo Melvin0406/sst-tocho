@@ -93,4 +93,12 @@ class AuthenticationViewModel: ObservableObject {
             print("Error signing out: %@", signOutError)
         }
     }
+    
+    func emailForProfile() -> String? {
+        return Auth.auth().currentUser?.email
+    }
+
+    func currentUser() -> FirebaseAuth.User? {
+        return Auth.auth().currentUser
+    }
 }

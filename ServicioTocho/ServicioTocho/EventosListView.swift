@@ -19,6 +19,14 @@ struct EventosListView: View {
                 }
             }
             .navigationTitle("Próximos Eventos")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) { // Botón a la derecha
+                    NavigationLink(destination: ProfileView(authViewModel: authViewModel)) {
+                        Image(systemName: "person.circle") // Icono de perfil
+                            .imageScale(.large) // Hace el icono un poco más grande
+                    }
+                }
+            }
         }
     }
 }
