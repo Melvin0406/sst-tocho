@@ -9,7 +9,12 @@ import MapKit
 
 struct EventoDetalleView: View {
     let evento: Evento
-    @State private var unido = false
+    @Binding var eventosUnidos: Set<UUID> // Vínculo con el estado de los eventos unidos
+
+    // Propiedad computada para verificar si el usuario ya está unido
+    var unido: Bool {
+        eventosUnidos.contains(evento.id)
+    }
 
     private var region: MKCoordinateRegion {
         MKCoordinateRegion(
@@ -67,7 +72,12 @@ struct EventoDetalleView: View {
 
                 // Botón para unirse
                 Button(action: {
-                    unido.toggle()
+                    // Si ya está unido, se elimina de la lista de eventos unidos, si no, se agrega
+                    if unido {
+                        eventosUnidos.remove(evento.id)
+                    } else {
+                        eventosUnidos.insert(evento.id)
+                    }
                 }) {
                     Text(unido ? "Ya estás unido" : "Unirse al evento")
                         .fontWeight(.semibold)
@@ -84,6 +94,7 @@ struct EventoDetalleView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    // Función para formatear las fechas
     func formatearFecha(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -112,7 +123,8 @@ struct InfoRow: View {
 struct EventoDetalleView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            EventoDetalleView(evento: mockEventos[0])
+            EventoDetalleView(evento: mockEventos[0], eventosUnidos: .constant(Set([mockEventos[0].id])))
         }
     }
 }
+
