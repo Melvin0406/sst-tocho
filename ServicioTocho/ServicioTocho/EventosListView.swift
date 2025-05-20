@@ -7,24 +7,36 @@
 import SwiftUI
 
 struct EventosListView: View {
-    @State var eventos: [Evento] = mockEventos
+    @State var eventos: [Evento] = mockEventos // Tus datos de ejemplo o los que cargues
     @StateObject var filtro = EventoFiltro()
-    @State private var eventosUnidos: Set<UUID> = []
+    // Se elimina @State private var eventosUnidos: Set<UUID> = []
     @State private var mostrarFiltro = false
     @ObservedObject var authViewModel: AuthenticationViewModel
 
     var tiposDeEventos: [String] {
+        // Esta lógica está bien para obtener los tipos únicos de tus eventos actuales
         let tipos = Set(eventos.map { $0.tipo })
-        return ["Todos"] + Array(tipos)
+        return ["Todos"] + Array(tipos).sorted()
     }
 
     var eventosFiltrados: [Evento] {
         eventos.filter { evento in
-            (filtro.tipoSeleccionado == "Todos" || evento.tipo == filtro.tipoSeleccionado) &&
-            evento.fechaInicio >= filtro.fechaDesde &&
-            evento.fechaInicio <= filtro.fechaHasta &&
-            (filtro.ubicacion.isEmpty || evento.ubicacionNombre.localizedCaseInsensitiveContains(filtro.ubicacion)) &&
-            (!filtro.soloUnidos || eventosUnidos.contains(evento.id))
+            let filtroTipo = (filtro.tipoSeleccionado == "Todos" || evento.tipo == filtro.tipoSeleccionado)
+            
+            // Ajustar comparación de fechas para ignorar la hora y solo comparar el día
+            let filtroFechaDesde = Calendar.current.compare(evento.fechaInicio, to: filtro.fechaDesde, toGranularity: .day) != .orderedAscending
+            let filtroFechaHasta = Calendar.current.compare(evento.fechaInicio, to: filtro.fechaHasta, toGranularity: .day) != .orderedDescending
+            
+            let filtroUbicacion = (filtro.ubicacion.isEmpty || evento.ubicacionNombre.localizedCaseInsensitiveContains(filtro.ubicacion))
+            
+            // Usar authViewModel para verificar si el usuario está unido al evento
+            var isActuallyRegistered = false // Por defecto, no registrado si el ID es inválido o nil
+            if let validEventID = evento.id, !validEventID.isEmpty {
+                isActuallyRegistered = authViewModel.isUserRegisteredForEvent(eventID: validEventID)
+            }
+            let filtroUnidos = (!filtro.soloUnidos || isActuallyRegistered)
+            
+            return filtroTipo && filtroFechaDesde && filtroFechaHasta && filtroUbicacion && filtroUnidos
         }
     }
 
@@ -32,7 +44,7 @@ struct EventosListView: View {
         NavigationView {
             List(eventosFiltrados) { evento in
                 NavigationLink(destination: EventoDetalleView(evento: evento, authViewModel: authViewModel)) {
-                    EventoRowView(evento: evento)
+                    EventoRowView(evento: evento) // Asumo que EventoRowView está definida
                 }
             }
             .navigationTitle("Próximos Eventos")
@@ -45,7 +57,7 @@ struct EventosListView: View {
                     }
                 }
 
-                // Botón de Filtro a la derecha (como ya lo tenías)
+                // Botón de Filtro a la derecha
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         mostrarFiltro = true
@@ -56,16 +68,14 @@ struct EventosListView: View {
                 }
             }
             .sheet(isPresented: $mostrarFiltro) {
-                // Asumo que FiltroEventosView es una vista que definiste
-                FiltroEventosView(filtro: filtro)
+                // Pasamos los tipos de eventos disponibles al filtro si es necesario
+                FiltroEventosView(filtro: filtro /*, tiposDeEventosDisponibles: tiposDeEventos */)
+            }
+            .onAppear {
+                if authViewModel.userProfile == nil, let uid = authViewModel.currentUser()?.uid {
+                    authViewModel.fetchUserProfile(uid: uid)
+                }
             }
         }
-    }
-}
-
-struct EventosListView_Previews: PreviewProvider {
-    static var previews: some View {
-        // Asegúrate de pasar el authViewModel correctamente
-        EventosListView(authViewModel: AuthenticationViewModel()) // Pasando el authViewModel
     }
 }

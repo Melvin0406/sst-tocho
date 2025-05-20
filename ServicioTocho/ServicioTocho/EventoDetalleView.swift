@@ -9,18 +9,18 @@ import MapKit
 
 struct EventoDetalleView: View {
     let evento: Evento
-    // Se elimina @Binding var eventosUnidos: Set<UUID>
-    // Se añade el ViewModel para manejar la lógica de registro
     @ObservedObject var authViewModel: AuthenticationViewModel
 
-    // Propiedad computada para verificar si el usuario ya está unido, usando el ViewModel
-    var isUserRegistered: Bool {
-        // Asegúrate de que tu Evento.id sea un String o puedas convertirlo a String.
-        // Si Evento.id es UUID, usamos evento.id.uuidString.
-        authViewModel.isUserRegisteredForEvent(eventID: evento.id.uuidString)
+    // Propiedad computada para verificar si el usuario ya está unido
+    private var isUserRegistered: Bool {
+        // 1. Asegurarnos de que evento.id (String?) no sea nil y no esté vacío
+        guard let validEventID = evento.id, !validEventID.isEmpty else {
+            return false // No se puede estar registrado a un evento sin un ID válido
+        }
+        // 2. Llamar a la función del ViewModel con el String válido
+        return authViewModel.isUserRegisteredForEvent(eventID: validEventID)
     }
 
-    // La región del mapa puede seguir como la tenías
     private var region: MKCoordinateRegion {
         MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: evento.latitud, longitude: evento.longitud),
@@ -39,19 +39,16 @@ struct EventoDetalleView: View {
 
                 // Mapa
                 Map(coordinateRegion: .constant(region), annotationItems: [evento]) { eventoItem in
-                    // Usamos eventoItem aquí, que es el 'evento' de la clausura, para asegurar la conformidad con Identifiable
                     MapMarker(coordinate: CLLocationCoordinate2D(latitude: eventoItem.latitud, longitude: eventoItem.longitud), tint: .blue)
                 }
                 .frame(height: 200)
                 .clipShape(RoundedRectangle(cornerRadius: 15))
                 .shadow(radius: 5)
 
-                // Información general en una sola tarjeta
+                // Información general
                 VStack(alignment: .leading, spacing: 10) {
-                    // Asumiendo que 'organizador' puede ser nil, usamos el operador ??
-                    InfoRow(label: "Organizador", value: evento.organizador ?? "No especificado")
-                    // Asumiendo que 'horasLiberadas' es una propiedad en tu struct Evento
-                    // y que es un Double opcional. Si es diferente, ajusta esto.
+                    InfoRow(label: "Organizador", value: evento.organizador) // Asumiendo que 'organizador' en tu struct Evento es String y no String?
+                                                                            // Si es String?, entonces evento.organizador ?? "No especificado"
                     InfoRow(label: "Horas a liberar", value: evento.horasLiberadas?.description ?? "N/A")
                     InfoRow(label: "Tipo", value: evento.tipo)
                     InfoRow(label: "Ubicación", value: evento.ubicacionNombre)
@@ -79,19 +76,27 @@ struct EventoDetalleView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
 
-                // Botón para unirse/cancelar registro, ahora usando authViewModel
+                // Botón de Unirse/Cancelar Registro
                 Button(action: {
-                    if isUserRegistered {
-                        authViewModel.unregisterUserFromEvent(eventID: evento.id.uuidString)
+                    // 1. Asegurarnos de que evento.id (String?) no sea nil y no esté vacío ANTES de la acción
+                    guard let validEventID = evento.id, !validEventID.isEmpty else {
+                        print("Error: ID de evento inválido. No se puede (des)registrar.")
+                        // Opcionalmente, mostrar una alerta al usuario
+                        return
+                    }
+
+                    // 2. Usar el validEventID (String) para las funciones del ViewModel
+                    if isUserRegistered { // isUserRegistered ya usa la lógica correcta con validEventID
+                        authViewModel.unregisterUserFromEvent(eventID: validEventID)
                     } else {
-                        authViewModel.registerUserForEvent(eventID: evento.id.uuidString)
+                        authViewModel.registerUserForEvent(eventID: validEventID)
                     }
                 }) {
                     Text(isUserRegistered ? "Cancelar Registro" : "Unirme al Evento")
                         .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isUserRegistered ? Color.red : Color.blue) // Cambiado el color para "Cancelar"
+                        .background(isUserRegistered ? Color.red : Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
@@ -99,18 +104,11 @@ struct EventoDetalleView: View {
             }
             .padding(.horizontal)
         }
-        .navigationTitle(evento.nombre) // Es bueno tener un título para la barra de navegación
+        .navigationTitle(evento.nombre)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            // Opcional: Si quieres asegurarte de que el perfil esté cargado
-            // aunque el init de AuthViewModel ya debería manejarlo.
-            // if authViewModel.userProfile == nil, let uid = authViewModel.currentUser()?.uid {
-            //     authViewModel.fetchUserProfile(uid: uid)
-            // }
-        }
+        // El .onAppear que tenías antes puede permanecer si lo necesitas
     }
 
-    // Función para formatear las fechas (la mantengo como la tenías)
     func formatearFecha(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -119,7 +117,7 @@ struct EventoDetalleView: View {
     }
 }
 
-// MARK: - Subvista para fila de información (la mantengo como la tenías)
+// MARK: - Subvista para fila de información (sin cambios)
 struct InfoRow: View {
     var label: String
     var value: String
@@ -128,7 +126,7 @@ struct InfoRow: View {
         HStack(alignment: .top) {
             Text("\(label):")
                 .fontWeight(.semibold)
-                .frame(width: 120, alignment: .leading) // Ajusta el ancho si es necesario
+                .frame(width: 120, alignment: .leading)
                 .foregroundColor(.secondary)
             Text(value)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -136,11 +134,11 @@ struct InfoRow: View {
     }
 }
 
+// MARK: - Preview (sin cambios respecto a la corrección anterior)
 struct EventoDetalleView_Previews: PreviewProvider {
     static var previews: some View {
-        // Necesitas un evento de ejemplo y un authViewModel para la preview
-        let mockEventoPreview = Evento( // Renombrado para evitar colisión con el parámetro de la vista
-            id: UUID(), // Asegúrate de que tu struct Evento tenga un id si no lo tiene por defecto
+        let mockEventoPreview = Evento(
+            id: "previewEvento123", // Ahora un String para el ID de @DocumentID
             nombre: "Evento de Prueba Detalle",
             descripcion: "Esta es una descripción larga y detallada del evento de prueba.",
             tipo: "Social",
@@ -149,14 +147,13 @@ struct EventoDetalleView_Previews: PreviewProvider {
             ubicacionNombre: "Lugar de Prueba, Calle Falsa 123",
             latitud: 32.537,
             longitud: -117.011,
-            organizador: "ONG Ejemplo"
+            organizador: "ONG Ejemplo", // Tu struct tiene organizador como String, no String?
             cupoMaximo: 30,
             horasLiberadas: 5
         )
         let mockAuthViewModel = AuthenticationViewModel()
-        // Para simular diferentes estados en la preview:
-        // 1. Usuario no registrado: mockAuthViewModel.userProfile = UserProfile(id: "testUID", username: "Test", email: "test@test.com", registeredEventIDs: [])
-        // 2. Usuario registrado: mockAuthViewModel.userProfile = UserProfile(id: "testUID", username: "Test", email: "test@test.com", registeredEventIDs: [mockEventoPreview.id.uuidString])
+        // Para simular que el usuario está registrado en la preview:
+        // mockAuthViewModel.userProfile = UserProfile(id: "testUID", username: "TestUser", email: "test@example.com", registeredEventIDs: ["previewEvento123"])
 
         NavigationView {
             EventoDetalleView(evento: mockEventoPreview, authViewModel: mockAuthViewModel)
