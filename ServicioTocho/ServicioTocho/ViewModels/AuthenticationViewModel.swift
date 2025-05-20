@@ -15,6 +15,7 @@ class AuthenticationViewModel: ObservableObject {
     @Published var password = ""
     @Published var userIsLoggedIn = false
     @Published var errorMessage: String?
+    @Published var userProfile: UserProfile?
 
     private var authStateHandler: AuthStateDidChangeListenerHandle?
     // private var db = Firestore.firestore() // Ya no necesitamos Firestore aquí
