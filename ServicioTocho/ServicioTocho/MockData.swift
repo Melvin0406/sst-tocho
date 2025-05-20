@@ -191,7 +191,7 @@ let mockEventos: [Evento] = [
             organizador: "Instituto Municipal de Arte y Cultura",
             cupoMaximo: 25,
             horasLiberadas: 20
-    )
+    ),
     Evento(
             nombre: "Apoyo en la Elaboración de Despensas",
             descripcion: "Ayuda a armar despensas con alimentos no perecederos para familias de bajos recursos en la comunidad.",

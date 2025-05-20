@@ -5,24 +5,23 @@
 //  Created by CETYS Universidad  on 12/05/25.
 //
 
-import SwiftUI // O Foundation, si no necesitas nada específico de SwiftUI aquí
-import CoreLocation // Para las coordenadas de ubicación
+import FirebaseFirestore
+import CoreLocation
 
-struct Evento: Identifiable, Codable { // Codable será útil para persistencia o API
-    var id = UUID()
+struct Evento: Identifiable, Codable {
+    @DocumentID var id: String? // El ID del documento de Firestore
     var nombre: String
     var descripcion: String
-    var tipo: String // Ejemplo: "Ambiental", "Social", "Educativo"
+    var tipo: String
     var fechaInicio: Date
     var fechaFin: Date
     var ubicacionNombre: String
     var latitud: Double
     var longitud: Double
-    var organizador: String // Opcional
-    var cupoMaximo: Int? 
+    var organizador: String
+    var cupoMaximo: Int?
     var horasLiberadas: Int?
 
-    // Para MapKit, podemos tener una propiedad computada para CLLocationCoordinate2D
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitud, longitude: longitud)
     }
