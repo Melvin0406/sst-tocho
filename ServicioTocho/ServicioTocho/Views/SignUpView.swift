@@ -68,7 +68,7 @@ struct SignUpView: View {
                 }
 
                 Button(action: {
-                    authViewModel.signUpAndStoreUsernameLocally(
+                    authViewModel.signUpAndCreateUserProfile(
                         username: username,
                         email: email,
                         password: password

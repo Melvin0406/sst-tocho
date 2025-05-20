@@ -6,7 +6,7 @@
 //
 
 
-import FirebaseFirestoreSwift // Necesario para @DocumentID y Codable con Firestore
+import FirebaseFirestore // Necesario para @DocumentID y Codable con Firestore
 
 struct UserProfile: Identifiable, Codable, Equatable { // Equatable para @Published en ViewModel si es necesario
     @DocumentID var id: String? // El UID de Firebase Auth se usará como ID del documento
