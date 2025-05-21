@@ -69,6 +69,23 @@ struct ProfileView: View {
                     .padding(20).background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(15).shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
                     .padding(.horizontal)
+                    
+                    NavigationLink(destination: HorasReportView(authViewModel: authViewModel, todosLosEventos: todosLosEventos)) {
+                                        HStack {
+                                            Image(systemName: "doc.text.fill")
+                                                .foregroundColor(Color.accentColorTeal)
+                                            Text("Generar Reporte de Horas")
+                                                .fontWeight(.medium)
+                                                .foregroundColor(Color.primary) // O Color.accentColorTeal si quieres que el texto sea del color de acento
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .foregroundColor(.secondary.opacity(0.7))
+                                        }
+                                        .padding()
+                                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                                        .cornerRadius(10)
+                                        .padding(.horizontal)
+                                    }
 
                     // --- Sección: Eventos para Registrar Horas ---
                     if !eventosParaRegistrarHoras.isEmpty {
