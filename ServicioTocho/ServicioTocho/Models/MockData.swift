@@ -11,6 +11,7 @@ import CoreLocation // Para las coordenadas
 // Datos de ejemplo para Eventos
 let mockEventos: [Evento] = [
     Evento(
+        id: UUID().uuidString,
         nombre: "Limpieza de Playa Costa Azul",
         descripcion: "Únete a nosotros para limpiar la playa Costa Azul y proteger nuestro ecosistema marino. Proporcionaremos bolsas y guantes.",
         tipo: "Ambiental",
@@ -24,6 +25,7 @@ let mockEventos: [Evento] = [
         horasLiberadas: 10
     ),
     Evento(
+        id: UUID().uuidString,
         nombre: "Colecta de Alimentos No Perecederos",
         descripcion: "Ayuda a recolectar alimentos para familias necesitadas en la comunidad. Se aceptan donaciones en el centro comunitario.",
         tipo: "Social",
@@ -37,6 +39,7 @@ let mockEventos: [Evento] = [
         horasLiberadas: 20
     ),
     Evento(
+        id: UUID().uuidString,
         nombre: "Taller de Lectura para Niños",
         descripcion: "Participa como voluntario leyendo cuentos y organizando actividades lúdicas para niños de primaria.",
         tipo: "Educativo",
@@ -50,6 +53,7 @@ let mockEventos: [Evento] = [
         horasLiberadas: 30
     ),
     Evento(
+        id: UUID().uuidString,
         nombre: "Reforestación Parque Morelos",
         descripcion: "Planta árboles y contribuye a la mejora del pulmón más grande de la ciudad. Herramientas y árboles proporcionados.",
         tipo: "Ambiental",
@@ -63,6 +67,7 @@ let mockEventos: [Evento] = [
         horasLiberadas: 20
     ),
     Evento(
+        id: UUID().uuidString,
             nombre: "Apoyo en Albergue para Migrantes",
             descripcion: "Colabora en la organización y distribución de recursos en un albergue que apoya a migrantes en la ciudad.",
             tipo: "Social",
@@ -76,6 +81,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 25
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Taller de Reciclaje Creativo",
             descripcion: "Enseña a reutilizar materiales reciclados para crear objetos útiles y artísticos.",
             tipo: "Ambiental",
@@ -89,6 +95,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 15
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Acompañamiento a Adultos Mayores",
             descripcion: "Brinda compañía y apoyo a adultos mayores en una residencia a través de actividades recreativas y conversaciones.",
             tipo: "Social",
@@ -102,6 +109,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 18
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Clases de Alfabetización para Adultos",
             descripcion: "Ayuda a personas adultas a aprender a leer y escribir, abriendo nuevas oportunidades para ellos.",
             tipo: "Educativo",
@@ -115,6 +123,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 35
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Jornada de Limpieza de Arroyo",
             descripcion: "Participa en la limpieza de un arroyo local para prevenir la contaminación y mejorar el entorno natural.",
             tipo: "Ambiental",
@@ -128,6 +137,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 16
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Apoyo en Evento de Donación de Sangre",
             descripcion: "Colabora en la logística y recepción de donantes en una campaña de donación de sangre.",
             tipo: "Salud",
@@ -141,6 +151,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 20
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Taller de Habilidades para la Vida para Jóvenes",
             descripcion: "Comparte tus habilidades y experiencias en talleres diseñados para empoderar a jóvenes de la comunidad.",
             tipo: "Educativo",
@@ -154,6 +165,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 25
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Cuidado de Jardín Comunitario",
             descripcion: "Ayuda a mantener y mejorar un jardín comunitario, cultivando alimentos y embelleciendo el espacio.",
             tipo: "Ambiental",
@@ -167,6 +179,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 12
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Apoyo en Actividades para Personas con Discapacidad",
             descripcion: "Sé voluntario apoyando en diversas actividades recreativas y educativas para personas con discapacidad.",
             tipo: "Inclusivo",
@@ -180,6 +193,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 30
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Organización de Evento Cultural para la Comunidad",
             descripcion: "Participa en la planificación y ejecución de un evento cultural que promueva las artes y la cultura local.",
             tipo: "Cultural",
@@ -193,7 +207,8 @@ let mockEventos: [Evento] = [
             horasLiberadas: 20
     ),
     Evento(
-            nombre: "Apoyo en la Elaboración de Despensas",
+        id: UUID().uuidString,
+        nombre: "Apoyo en la Elaboración de Despensas",
             descripcion: "Ayuda a armar despensas con alimentos no perecederos para familias de bajos recursos en la comunidad.",
             tipo: "Social",
             fechaInicio: Calendar.current.date(byAdding: .day, value: 12, to: Date())!,
@@ -206,6 +221,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 15
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Taller de Reparación de Bicicletas",
             descripcion: "Comparte tus conocimientos en mecánica de bicicletas enseñando a otros a reparar y mantener sus bicis.",
             tipo: "Comunitario",
@@ -219,6 +235,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 18
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Visitas a Pacientes en Hospital Infantil",
             descripcion: "Brinda alegría y compañía a niños hospitalizados a través de juegos y actividades recreativas.",
             tipo: "Social",
@@ -232,6 +249,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 10
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Apoyo en Campaña de Vacunación",
             descripcion: "Colabora en la logística y organización de una campaña de vacunación en diferentes puntos de la ciudad.",
             tipo: "Salud",
@@ -245,6 +263,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 20
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Taller de Creación de Instrumentos Musicales con Materiales Reciclados",
             descripcion: "Imparte un taller donde los participantes aprenderán a crear instrumentos musicales utilizando objetos reciclados.",
             tipo: "Cultural",
@@ -258,6 +277,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 15
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Apoyo en la Protección de Tortugas Marinas",
             descripcion: "Participa en actividades de vigilancia y protección de nidos de tortugas marinas en las playas cercanas.",
             tipo: "Ambiental",
@@ -271,6 +291,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 18
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Asistencia en Evento Deportivo para Niños",
             descripcion: "Ayuda en la organización y desarrollo de juegos y actividades deportivas para niños de la comunidad.",
             tipo: "Deportivo",
@@ -284,6 +305,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 12
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Tutorías de Matemáticas para Estudiantes de Primaria",
             descripcion: "Ofrece apoyo académico en matemáticas a niños de primaria que lo necesiten.",
             tipo: "Educativo",
@@ -297,6 +319,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 20
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Acompañamiento a Personas con Discapacidad Visual",
             descripcion: "Brinda apoyo y acompañamiento a personas con discapacidad visual en actividades cotidianas y eventos.",
             tipo: "Inclusivo",
@@ -310,6 +333,7 @@ let mockEventos: [Evento] = [
             horasLiberadas: 15
     ),
         Evento(
+            id: UUID().uuidString,
             nombre: "Apoyo en la Organización de Mercadito Comunitario",
             descripcion: "Colabora en la organización y logística de un mercado comunitario que promueve productos locales y el comercio justo.",
             tipo: "Comunitario",

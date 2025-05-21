@@ -14,7 +14,7 @@ struct SignUpView: View {
     @StateObject private var authViewModel = AuthenticationViewModel()
     @Environment(\.dismiss) var dismiss
 
-    @State private var username = ""
+    @State private var nombreCompleto = ""
     @State private var email = ""
     @State private var password = ""
     // @State private var confirmPassword = "" // Opcional
@@ -26,7 +26,7 @@ struct SignUpView: View {
                     .font(.largeTitle)
                     .padding(.bottom, 30)
 
-                TextField("Nombre de Usuario (local)", text: $username)
+                TextField("Nombre de Usuario (local)", text: $nombreCompleto)
                     .autocapitalization(.none)
                     .disableAutocorrection(true)
                     .padding()
@@ -69,7 +69,7 @@ struct SignUpView: View {
 
                 Button(action: {
                     authViewModel.signUpAndCreateUserProfile(
-                        username: username,
+                        nombreCompleto: nombreCompleto,
                         email: email,
                         password: password
                     )

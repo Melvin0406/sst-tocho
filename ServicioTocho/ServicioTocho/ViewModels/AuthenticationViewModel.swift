@@ -19,9 +19,6 @@ class AuthenticationViewModel: ObservableObject {
     private var authStateHandler: AuthStateDidChangeListenerHandle?
     private var db = Firestore.firestore()
 
-    // Clave para UserDefaults donde guardaremos los usernames
-    private let userPreferencesKeyPrefix = "voluntariadoAppUser_"
-
     init() {
         authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
             guard let self = self else { return } // Asegura que self no es nil
@@ -58,7 +55,7 @@ class AuthenticationViewModel: ObservableObject {
                     do {
                         // Intenta decodificar el documento a tu struct UserProfile
                         self.userProfile = try document.data(as: UserProfile.self)
-                        print("Perfil de usuario cargado: \(self.userProfile?.username ?? "N/A")")
+                        print("Perfil de usuario cargado: \(self.userProfile?.nombreCompleto ?? "N/A")")
                         print("Eventos registrados: \(self.userProfile?.registeredEventIDs ?? [])")
                         // Si necesitas actualizar alguna otra UI basada en el perfil cargado, puedes hacerlo aquí
                         // o emitir una notificación/actualización adicional si es complejo.
@@ -87,11 +84,9 @@ class AuthenticationViewModel: ObservableObject {
         }
     }
 
-    // ... (resto de las funciones del AuthenticationViewModel como signUpAndCreateUserProfile, login, signOut, etc.) ...
-
-    func signUpAndCreateUserProfile(username: String, email: String, password: String) {
+    func signUpAndCreateUserProfile(nombreCompleto: String, email: String, password: String) {
         self.errorMessage = nil
-        guard !username.isEmpty, !email.isEmpty, !password.isEmpty else {
+        guard !nombreCompleto.isEmpty, !email.isEmpty, !password.isEmpty else {
             errorMessage = "Por favor, completa todos los campos."
             return
         }
@@ -114,7 +109,11 @@ class AuthenticationViewModel: ObservableObject {
             }
 
             // Crear el perfil de usuario para Firestore
-            let newUserProfile = UserProfile(id: user.uid, username: username, email: email, registeredEventIDs: []) // Inicia con lista vacía
+            let newUserProfile = UserProfile(id: user.uid,
+                                             nombreCompleto: nombreCompleto,
+                                             email: email,
+                                             horasAcumuladas: 0.0, // Valor inicial
+                                             registeredEventIDs: [])
 
             do {
                 // Guardar el perfil en Firestore en la colección "users"
@@ -122,8 +121,6 @@ class AuthenticationViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         if let error = error {
                             self.errorMessage = "Error al guardar perfil: \(error.localizedDescription)"
-                            // Considera eliminar el usuario de Auth si falla este paso crítico
-                            // user.delete { deleteError in ... }
                         } else {
                             print("Usuario creado en Auth y perfil guardado en Firestore.")
                             self.userProfile = newUserProfile // Actualiza el perfil localmente
@@ -139,14 +136,6 @@ class AuthenticationViewModel: ObservableObject {
             }
         }
     }
-
-    // Función para obtener el username localmente
-    func getLocalUsername(for uid: String?) -> String? {
-        guard let uid = uid else { return nil }
-        let defaults = UserDefaults.standard
-        return defaults.string(forKey: "\(userPreferencesKeyPrefix)username_\(uid)")
-    }
-
 
     func login() {
         self.errorMessage = nil
@@ -189,8 +178,8 @@ class AuthenticationViewModel: ObservableObject {
         return Auth.auth().currentUser?.email
     }
 
-    func usernameForProfile() -> String? {
-        return userProfile?.username
+    func nombreCompletoForProfile() -> String? {
+        return userProfile?.nombreCompleto
     }
 
     func currentUser() -> FirebaseAuth.User? {

@@ -8,17 +8,23 @@
 
 import FirebaseFirestore // Necesario para @DocumentID y Codable con Firestore
 
-struct UserProfile: Identifiable, Codable, Equatable { // Equatable para @Published en ViewModel si es necesario
-    @DocumentID var id: String? // El UID de Firebase Auth se usará como ID del documento
-    var username: String
+struct UserProfile: Identifiable, Codable, Equatable {
+    @DocumentID var id: String?
+    var nombreCompleto: String
     var email: String
-    var registeredEventIDs: [String]? // Array de IDs de los eventos a los que el usuario se ha unido
+    var horasAcumuladas: Double = 0.0
+    var registeredEventIDs: [String]? = []
 
-    // Inicializador para cuando creamos un nuevo perfil
-    init(id: String? = nil, username: String, email: String, registeredEventIDs: [String]? = nil) {
+    // Inicializador actualizado
+    init(id: String? = nil,
+         nombreCompleto: String,
+         email: String,
+         horasAcumuladas: Double = 0.0,
+         registeredEventIDs: [String]? = nil) {
         self.id = id
-        self.username = username
+        self.nombreCompleto = nombreCompleto
         self.email = email
-        self.registeredEventIDs = registeredEventIDs ?? [] // Inicializar como array vacío si es nil
+        self.horasAcumuladas = horasAcumuladas
+        self.registeredEventIDs = registeredEventIDs ?? []
     }
 }

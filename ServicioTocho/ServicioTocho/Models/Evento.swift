@@ -18,9 +18,24 @@ struct Evento: Identifiable, Codable {
     var ubicacionNombre: String
     var latitud: Double
     var longitud: Double
-    var organizador: String
+    var organizador: String?
     var cupoMaximo: Int?
     var horasLiberadas: Int?
+    
+        init(id: String? = nil, nombre: String, descripcion: String, tipo: String, fechaInicio: Date, fechaFin: Date, ubicacionNombre: String, latitud: Double, longitud: Double, organizador: String, cupoMaximo: Int? = nil, horasLiberadas: Int? = nil) {
+            self.id = id
+            self.nombre = nombre
+            self.descripcion = descripcion
+            self.tipo = tipo
+            self.fechaInicio = fechaInicio
+            self.fechaFin = fechaFin
+            self.ubicacionNombre = ubicacionNombre
+            self.latitud = latitud
+            self.longitud = longitud
+            self.organizador = organizador
+            self.cupoMaximo = cupoMaximo
+            self.horasLiberadas = horasLiberadas
+        }
 
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitud, longitude: longitud)

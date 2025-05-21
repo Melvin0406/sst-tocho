@@ -69,7 +69,7 @@ struct EventosListView: View {
             }
             .sheet(isPresented: $mostrarFiltro) {
                 // Pasamos los tipos de eventos disponibles al filtro si es necesario
-                FiltroEventosView(filtro: filtro /*, tiposDeEventosDisponibles: tiposDeEventos */)
+                FiltroEventosView(filtro: filtro, tiposDeEventosDisponibles: tiposDeEventos)
             }
             .onAppear {
                 if authViewModel.userProfile == nil, let uid = authViewModel.currentUser()?.uid {

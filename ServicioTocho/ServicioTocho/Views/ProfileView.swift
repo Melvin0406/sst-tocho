@@ -20,14 +20,14 @@ struct ProfileView: View {
                     .font(.largeTitle)
                     .padding(.bottom)
 
-                if let username = authViewModel.usernameForProfile() { // Usamos la nueva función
+                if let nombreComp = authViewModel.nombreCompletoForProfile() { // Usamos la nueva función
                     HStack {
-                        Text("Nombre de Usuario:").bold()
+                        Text("Nombre Completo:").bold()
                         Text(username)
                     }
                 } else {
                     HStack {
-                        Text("Nombre de Usuario:").bold()
+                        Text("Nombre Completo:").bold()
                         Text("No disponible")
                     }
                 }
@@ -38,14 +38,13 @@ struct ProfileView: View {
                         Text(email)
                     }
                 }
-
-                // Si quieres mostrar el UID (usualmente para depuración)
-                // if let user = authViewModel.currentUser() {
-                //     HStack {
-                //        Text("UID:").bold()
-                //        Text(user.uid).font(.caption)
-                //     }
-                // }
+                
+                if let horas = authViewModel.userProfile?.horasAcumuladas {
+                    HStack {
+                        Text("Horas Acumuladas:").bold()
+                        Text(String(format: "%.1f", horas)) // Formatear a 1 decimal
+                    }
+                }
 
                 Spacer()
 

@@ -10,15 +10,16 @@ import SwiftUI
 
 struct FiltroEventosView: View {
     @ObservedObject var filtro: EventoFiltro
+    let tiposDeEventosDisponibles: [String]
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
         NavigationView {
             Form {
                 Picker("Tipo", selection: $filtro.tipoSeleccionado) {
-                    Text("Todos").tag("Todos")
-                    Text("Ambiental").tag("Ambiental")
-                    Text("Social").tag("Social")
-                    Text("Educativo").tag("Educativo")
+                    ForEach(tiposDeEventosDisponibles, id: \.self) { tipo in
+                        Text(tipo).tag(tipo)
+                    }
                 }
 
                 DatePicker("Desde", selection: $filtro.fechaDesde, displayedComponents: .date)
@@ -34,6 +35,7 @@ struct FiltroEventosView: View {
                     Button("Aplicar") {
                         // Al cerrarse el sheet, los valores ya están actualizados
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        dismiss()
                     }
                 }
             }
