@@ -15,6 +15,7 @@ class AuthenticationViewModel: ObservableObject {
     @Published var userIsLoggedIn = false
     @Published var errorMessage: String?
     @Published var userProfile: UserProfile?
+    @Published var misRegistrosDeHoras: [RegistroHora] = []
 
     private var authStateHandler: AuthStateDidChangeListenerHandle?
     private var db = Firestore.firestore()
@@ -27,9 +28,11 @@ class AuthenticationViewModel: ObservableObject {
                 if let firebaseUser = user {
                     print("Usuario logueado con UID: \(firebaseUser.uid)")
                     self.fetchUserProfile(uid: firebaseUser.uid) // Cargar perfil al loguearse
+                    self.fetchMisRegistrosDeHoras()
                 } else {
                     print("Usuario no logueado.")
                     self.userProfile = nil // Limpiar perfil al cerrar sesión
+                    self.misRegistrosDeHoras = []
                 }
                 // Limpiar mensajes de error al cambiar el estado de autenticación
                 // Podrías decidir si quieres limpiar el errorMessage aquí o no,
@@ -235,5 +238,142 @@ class AuthenticationViewModel: ObservableObject {
     // Función helper para saber si un usuario está registrado a un evento específico
     func isUserRegisteredForEvent(eventID: String) -> Bool {
         return userProfile?.registeredEventIDs?.contains(eventID) ?? false
+    }
+    
+    func fetchMisRegistrosDeHoras() {
+        guard let userID = Auth.auth().currentUser?.uid else {
+            print("Usuario no autenticado, no se pueden cargar los registros de horas.")
+            // Considera limpiar misRegistrosDeHoras si el usuario cierra sesión
+            // self.misRegistrosDeHoras = []
+            return
+        }
+
+        db.collection("registros_horas")
+          .whereField("idUsuario", isEqualTo: userID)
+          .order(by: "fecha", descending: true) // Opcional: ordenar por fecha de registro
+          .getDocuments { querySnapshot, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("Error al obtener registros de horas: \(error.localizedDescription)")
+                    self.errorMessage = "No se pudo cargar el historial de horas: \(error.localizedDescription)"
+                    self.misRegistrosDeHoras = [] // Limpiar en caso de error
+                    return
+                }
+
+                guard let documents = querySnapshot?.documents else {
+                    print("No se encontraron documentos de registros de horas.")
+                    self.misRegistrosDeHoras = []
+                    return
+                }
+
+                self.misRegistrosDeHoras = documents.compactMap { document -> RegistroHora? in
+                    do {
+                        return try document.data(as: RegistroHora.self)
+                    } catch {
+                        print("Error al decodificar RegistroHora: \(error.localizedDescription)")
+                        return nil
+                    }
+                }
+                print("Registros de horas cargados: \(self.misRegistrosDeHoras.count)")
+            }
+        }
+    }
+    
+    func logHoursForEvent(eventoID: String, horas: Double, descripcion: String?, completion: @escaping (Bool, String?) -> Void) {
+        guard let userID = Auth.auth().currentUser?.uid, let userEmail = Auth.auth().currentUser?.email else {
+            completion(false, "Usuario no autenticado.")
+            return
+        }
+
+        guard var currentUserProfile = self.userProfile else {
+            completion(false, "Perfil de usuario no cargado.")
+            return
+        }
+
+        // 1. Crear el objeto RegistroHora
+        let nuevoRegistro = RegistroHora(
+            // id se genera automáticamente si es UUID, o se asigna por Firestore si es String y @DocumentID
+            // Aquí asumimos que el id de RegistroHora será generado por Firestore si es @DocumentID String?
+            // o se auto-genera si es UUID. Por ahora, el modelo tiene var id = UUID()
+            idEvento: eventoID,
+            idUsuario: userID,
+            fecha: Date(), // Fecha actual del registro
+            horasReportadas: horas,
+            aprobado: true, // Auto-aprobado por ahora
+            descripcionActividad: descripcion
+        )
+
+        // 2. Guardar el RegistroHora en Firestore (nueva colección "registros_horas")
+        // Usamos un bloque de lote (batch) para asegurar que ambas operaciones (guardar registro y actualizar perfil)
+        // se completen o fallen juntas, si es posible y deseado.
+        // Por simplicidad, haremos operaciones separadas con manejo de errores individual.
+
+        let registroRef = db.collection("registros_horas").document() // Firestore genera el ID para el nuevo registro
+
+        do {
+            try registroRef.setData(from: nuevoRegistro) { error in
+                if let error = error {
+                    print("Error al guardar RegistroHora en Firestore: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        completion(false, "Error al guardar el registro de horas: \(error.localizedDescription)")
+                    }
+                    return
+                }
+
+                print("RegistroHora guardado exitosamente con ID: \(registroRef.documentID)")
+
+                // --- INICIO DE LA ACTUALIZACIÓN IMPORTANTE ---
+                // 1. Actualización optimista local de misRegistrosDeHoras
+                // Esto hará que la UI reaccione más rápido.
+                // Es importante que RegistroHora sea Equatable si quieres evitar duplicados exactos
+                // o maneja la inserción/actualización con cuidado.
+                // Como fetchMisRegistrosDeHoras() se llamará después, esto se sincronizará.
+                DispatchQueue.main.async {
+                                // Creamos una nueva copia del array, añadimos el nuevo registro,
+                                // y luego reasignamos la propiedad @Published.
+                                // Esto tiende a ser una señal más clara para SwiftUI de que el array ha cambiado.
+                                var nuevosRegistros = self.misRegistrosDeHoras
+                                nuevosRegistros.append(nuevoRegistro) // O insert(at: 0) si prefieres al inicio
+                                self.misRegistrosDeHoras = nuevosRegistros
+                                print("ViewModel: misRegistrosDeHoras actualizado localmente (optimista). Nuevo count: \(self.misRegistrosDeHoras.count)")
+                            }
+
+
+                // 2. Actualizar horasAcumuladas en UserProfile en Firestore
+                // Obtenemos las horas acumuladas actuales del userProfile local o volvemos a pedirlas.
+                // Es más seguro usar las horas del perfil que ya tenemos, si está actualizado.
+                let horasActuales = self.userProfile?.horasAcumuladas ?? 0.0
+                let nuevasHorasAcumuladas = horasActuales + horas
+                
+                self.db.collection("users").document(userID).updateData([
+                    "horasAcumuladas": nuevasHorasAcumuladas
+                    // Aquí NO vamos a modificar registeredEventIDs directamente en Firestore.
+                    // La lógica de si un evento está "pendiente de horas" o "en historial"
+                    // se basa en si existe un RegistroHora para él, no en quitarlo de registeredEventIDs.
+                    // Un usuario sigue "registrado" a un evento incluso después de cargar horas.
+                ]) { error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            print("Error al actualizar horas acumuladas: \(error.localizedDescription)")
+                            // Revertir la actualización optimista de misRegistrosDeHoras si es necesario,
+                            // aunque el fetch posterior lo corregirá.
+                            self.misRegistrosDeHoras.removeAll(where: { $0.id == nuevoRegistro.id }) // Revierte si el ID de nuevoRegistro es estable
+                            completion(false, "Registro guardado, pero error al actualizar horas totales: \(error.localizedDescription)")
+                        } else {
+                            print("Horas acumuladas actualizadas exitosamente.")
+                            // Es crucial recargar AMBOS para asegurar consistencia total con Firestore.
+                            self.fetchUserProfile(uid: userID)       // Actualiza userProfile (incluye horasAcumuladas)
+                            self.fetchMisRegistrosDeHoras()      // Actualiza la lista de todos los registros
+                            completion(true, nil)
+                        }
+                    }
+                }
+            }
+        } catch {
+            print("Error al codificar RegistroHora o preparar la escritura: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                completion(false, "Error al preparar los datos del registro: \(error.localizedDescription)")
+            }
+        }
     }
 }
