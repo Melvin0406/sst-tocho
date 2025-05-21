@@ -8,6 +8,8 @@
 import Foundation
 import FirebaseAuth
 import FirebaseFirestore
+import PDFKit
+import UIKit
 
 class AuthenticationViewModel: ObservableObject {
     @Published var email = ""
@@ -279,6 +281,8 @@ class AuthenticationViewModel: ObservableObject {
         }
     }
     
+    
+    
     func logHoursForEvent(eventoID: String, horas: Double, descripcion: String?, completion: @escaping (Bool, String?) -> Void) {
         guard let userID = Auth.auth().currentUser?.uid, let userEmail = Auth.auth().currentUser?.email else {
             completion(false, "Usuario no autenticado.")
@@ -375,5 +379,137 @@ class AuthenticationViewModel: ObservableObject {
                 completion(false, "Error al preparar los datos del registro: \(error.localizedDescription)")
             }
         }
+    }
+    
+    func generarReportePDFDatos(eventos todosLosEventos: [Evento]) -> Data? {
+        guard let userProfile = self.userProfile, !self.misRegistrosDeHoras.isEmpty else {
+            print("Perfil de usuario o registros de horas no disponibles para PDF.")
+            return nil
+        }
+
+        let pdfMetaData = [
+            kCGPDFContextCreator: "VoluntariadoApp",
+            kCGPDFContextAuthor: userProfile.nombreCompleto,
+            kCGPDFContextTitle: "Reporte de Horas de Servicio Social"
+        ]
+        let format = UIGraphicsPDFRendererFormat()
+        format.documentInfo = pdfMetaData as [String: Any]
+
+        let pageWidth: CGFloat = 8.27 * 72.0  // A4 Ancho en puntos (1 pulgada = 72 puntos)
+        let pageHeight: CGFloat = 11.69 * 72.0 // A4 Alto en puntos
+        let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
+
+        let margin: CGFloat = 0.75 * 72.0 // Margen de 0.75 pulgadas
+        let contentWidth = pageWidth - (2 * margin)
+
+        let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
+
+        let data = renderer.pdfData { (context) in
+            var currentPage = 0
+            var yPosition: CGFloat = margin // Posición Y actual para dibujar
+
+            // --- Función para dibujar encabezado de página ---
+            let drawPageHeader = {
+                yPosition = margin // Reiniciar Y para cada nueva página
+
+                let reportTitle = "Reporte de Horas de Servicio Social"
+                let titleFont = UIFont.systemFont(ofSize: 18, weight: .bold)
+                let reportTitleSize = reportTitle.size(withAttributes: [.font: titleFont])
+                reportTitle.draw(at: CGPoint(x: (pageWidth - reportTitleSize.width) / 2, y: yPosition),
+                                 withAttributes: [.font: titleFont, .foregroundColor: UIColor.black])
+                yPosition += reportTitleSize.height + 20
+
+                let studentInfoFont = UIFont.systemFont(ofSize: 12)
+                let studentName = "Estudiante: \(userProfile.nombreCompleto)"
+                studentName.draw(at: CGPoint(x: margin, y: yPosition),
+                                 withAttributes: [.font: studentInfoFont, .foregroundColor: UIColor.darkGray])
+                yPosition += studentName.size(withAttributes: [.font: studentInfoFont]).height + 5
+
+                let studentEmail = "Correo: \(userProfile.email)"
+                studentEmail.draw(at: CGPoint(x: margin, y: yPosition),
+                                  withAttributes: [.font: studentInfoFont, .foregroundColor: UIColor.darkGray])
+                yPosition += studentEmail.size(withAttributes: [.font: studentInfoFont]).height + 5
+
+                let totalHours = "Total Horas Aprobadas: \(String(format: "%.1f", userProfile.horasAcumuladas))"
+                totalHours.draw(at: CGPoint(x: margin, y: yPosition),
+                                withAttributes: [.font: UIFont.systemFont(ofSize: 12, weight: .semibold), .foregroundColor: UIColor.black])
+                yPosition += totalHours.size(withAttributes: [.font: studentInfoFont]).height + 15
+
+                // Línea divisora
+                context.cgContext.move(to: CGPoint(x: margin, y: yPosition))
+                context.cgContext.addLine(to: CGPoint(x: pageWidth - margin, y: yPosition))
+                context.cgContext.setStrokeColor(UIColor.lightGray.cgColor)
+                context.cgContext.strokePath()
+                yPosition += 15
+            }
+
+            // --- Función para dibujar pie de página ---
+            let drawPageFooter = { (pageNum: Int) in
+                let footerFont = UIFont.systemFont(ofSize: 9)
+                let pageText = "Página \(pageNum)"
+                let pageSize = pageText.size(withAttributes: [.font: footerFont])
+                pageText.draw(at: CGPoint(x: pageWidth - margin - pageSize.width, y: pageHeight - margin + 10), // Ligeramente fuera del margen inferior
+                              withAttributes: [.font: footerFont, .foregroundColor: UIColor.gray])
+            }
+
+
+            // Iniciar la primera página
+            context.beginPage()
+            currentPage += 1
+            drawPageHeader()
+            drawPageFooter(currentPage)
+
+
+            let entryFont = UIFont.systemFont(ofSize: 11)
+            let entryBoldFont = UIFont.systemFont(ofSize: 11, weight: .semibold)
+            let entrySpacing: CGFloat = 20 // Espacio entre entradas de registro
+
+            for registro in self.misRegistrosDeHoras {
+                guard let evento = todosLosEventos.first(where: { $0.id == registro.idEvento }) else { continue }
+
+                var entryHeightEstimate: CGFloat = 0
+                let eventNameText = "Evento: \(evento.nombre)"
+                let eventNameAttrString = NSAttributedString(string: eventNameText, attributes: [.font: entryBoldFont])
+                entryHeightEstimate += eventNameAttrString.boundingRect(with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil).height
+
+                let hoursText = "Horas Reportadas: \(String(format: "%.1f", registro.horasReportadas))"
+                let hoursAttrString = NSAttributedString(string: hoursText, attributes: [.font: entryFont])
+                entryHeightEstimate += hoursAttrString.boundingRect(with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil).height + 3
+
+                if let desc = registro.descripcionActividad, !desc.isEmpty {
+                    let descText = "Actividad: \(desc)"
+                    let descAttrString = NSAttributedString(string: descText, attributes: [.font: entryFont])
+                    entryHeightEstimate += descAttrString.boundingRect(with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil).height + 3
+                }
+                entryHeightEstimate += 10 // Padding inferior para la entrada
+
+                // Comprobar si necesitamos una nueva página
+                if yPosition + entryHeightEstimate > (pageHeight - margin - 20) { // -20 para un poco de espacio antes del pie
+                    context.beginPage()
+                    currentPage += 1
+                    drawPageHeader()
+                    drawPageFooter(currentPage)
+                }
+
+                // Dibujar Nombre del Evento
+                eventNameAttrString.draw(in: CGRect(x: margin, y: yPosition, width: contentWidth, height: 100)) // Altura grande para que quepa
+                yPosition += eventNameAttrString.boundingRect(with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil).height + 3
+
+                // Dibujar Horas
+                hoursAttrString.draw(at: CGPoint(x: margin, y: yPosition))
+                yPosition += hoursAttrString.size().height + 3
+
+                // Dibujar Descripción
+                if let desc = registro.descripcionActividad, !desc.isEmpty {
+                    let descText = "Actividad: \(desc)"
+                    let descAttrString = NSAttributedString(string: descText, attributes: [.font: entryFont])
+                    let descRect = descAttrString.boundingRect(with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil)
+                    descAttrString.draw(in: CGRect(x: margin, y: yPosition, width: contentWidth, height: descRect.height))
+                    yPosition += descRect.height + 3
+                }
+                yPosition += entrySpacing // Espacio antes del siguiente evento
+            }
+        }
+        return data
     }
 }
