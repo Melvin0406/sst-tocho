@@ -47,8 +47,7 @@ struct EventoDetalleView: View {
 
                 // Información general
                 VStack(alignment: .leading, spacing: 10) {
-                    InfoRow(label: "Organizador", value: evento.organizador) // Asumiendo que 'organizador' en tu struct Evento es String y no String?
-                                                                            // Si es String?, entonces evento.organizador ?? "No especificado"
+                    InfoRow(label: "Organizador", value: evento.organizador ?? "No especificado")
                     InfoRow(label: "Horas a liberar", value: evento.horasLiberadas?.description ?? "N/A")
                     InfoRow(label: "Tipo", value: evento.tipo)
                     InfoRow(label: "Ubicación", value: evento.ubicacionNombre)

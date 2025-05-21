@@ -23,7 +23,7 @@ struct ProfileView: View {
                 if let nombreComp = authViewModel.nombreCompletoForProfile() { // Usamos la nueva función
                     HStack {
                         Text("Nombre Completo:").bold()
-                        Text(username)
+                        Text(nombreComp)
                     }
                 } else {
                     HStack {
