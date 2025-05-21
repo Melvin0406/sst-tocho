@@ -5,93 +5,141 @@
 //  Created by CETYS Universidad  on 14/05/25.
 //
 
-
 import SwiftUI
 
 struct SignUpView: View {
-    // Usaremos una instancia propia del ViewModel para esta pantalla,
-    // ya que el flujo de registro es autocontenido aquí hasta que se completa.
     @StateObject private var authViewModel = AuthenticationViewModel()
     @Environment(\.dismiss) var dismiss
 
     @State private var nombreCompleto = ""
     @State private var email = ""
     @State private var password = ""
-    // @State private var confirmPassword = "" // Opcional
+    // @State private var confirmPassword = "" // Sigue siendo opcional
+
+    // No necesitamos un init() para la barra de navegación aquí,
+    // ya que la barra es proporcionada por LoginView.
 
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Text("Crear Nueva Cuenta")
-                    .font(.largeTitle)
-                    .padding(.bottom, 30)
+        ZStack { // ZStack para el color de fondo general
+            Color.appBackground.edgesIgnoringSafeArea(.all)
 
-                TextField("Nombre de Usuario (local)", text: $nombreCompleto)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .padding()
-                    .background(Color(UIColor.systemGray6))
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                    )
+            ScrollView {
+                VStack(spacing: 25) { // Espaciado general
+                    
+                    // Icono/Logo de la App (Placeholder)
+                    Image(systemName: "person.fill.badge.plus") // Icono para registro
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 70, height: 70) // Ligeramente más pequeño que el de Login
+                        .foregroundColor(Color.accentColorTeal.opacity(0.8))
+                        .padding(.top, 30) // Menos padding superior que en Login
+                        .padding(.bottom, 10)
 
+                    Text("Crear Nueva Cuenta")
+                        .font(.title2) // Consistente con LoginView
+                        .fontWeight(.bold)
+                        .foregroundColor(Color.primary)
+                        .padding(.bottom, 30)
 
-                TextField("Correo Electrónico", text: $email)
-                    .keyboardType(.emailAddress)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .padding()
-                    .background(Color(UIColor.systemGray6))
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                    )
+                    // Campo Nombre Completo
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Nombre Completo")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        HStack {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(Color.accentColorTeal)
+                            TextField("Ingresa tu nombre completo", text: $nombreCompleto)
+                                .autocapitalization(.words) // Bueno para nombres
+                                .disableAutocorrection(false) // La autocorrección puede ser útil para nombres
+                        }
+                        .padding(12)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                    }
 
-                SecureField("Contraseña", text: $password)
-                    .padding()
-                    .background(Color(UIColor.systemGray6))
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                    )
+                    // Campo Correo Electrónico
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Correo Electrónico")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        HStack {
+                            Image(systemName: "envelope.fill")
+                                .foregroundColor(Color.accentColorTeal)
+                            TextField("usuario@ejemplo.com", text: $email)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                                .disableAutocorrection(true)
+                        }
+                        .padding(12)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                    
+                    // Campo Contraseña
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Contraseña")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        HStack {
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(Color.accentColorTeal)
+                            SecureField("Crea una contraseña segura", text: $password)
+                        }
+                        .padding(12)
+                        .background(Color(UIColor.secondarySystemGroupedBackground))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                    }
 
-                if let errorMessage = authViewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .font(.caption)
-                        .lineLimit(nil)
-                        .padding(.horizontal)
+                    if let errorMessage = authViewModel.errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.footnote)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+
+                    Button(action: {
+                        authViewModel.signUpAndCreateUserProfile(
+                            nombreCompleto: nombreCompleto,
+                            email: email,
+                            password: password
+                        )
+                    }) {
+                        Text("Registrarse")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.accentColorTeal) // Usar color de acento
+                            .cornerRadius(10)
+                            .shadow(color: Color.accentColorTeal.opacity(0.4), radius: 5, x: 0, y: 3)
+                    }
+                    .padding(.top, 10)
+                    
+                    Spacer() // Para el contenido en pantallas grandes
                 }
-
-                Button(action: {
-                    authViewModel.signUpAndCreateUserProfile(
-                        nombreCompleto: nombreCompleto,
-                        email: email,
-                        password: password
-                    )
-                }) {
-                    Text("Registrarse")
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .cornerRadius(8)
-                }
-                Spacer()
+                .padding(.horizontal, 30) // Padding horizontal para el contenido del VStack
             }
-            .padding()
-            .navigationTitle("Registro")
-            .navigationBarTitleDisplayMode(.inline)
-            .onReceive(authViewModel.$userIsLoggedIn) { isLoggedIn in
-                if isLoggedIn {
-                    // AuthManagerView se encargará del cambio de vista principal.
-                    // Este dismiss es para cerrar la vista de SignUp en sí misma.
-                    dismiss()
-                }
+        }
+        .navigationTitle("Registro") // Este título se mostrará en la barra de LoginView
+        .navigationBarTitleDisplayMode(.inline)
+        // El botón "Atrás" será coloreado por el .accentColor de LoginView
+        .onReceive(authViewModel.$userIsLoggedIn) { isLoggedIn in
+            if isLoggedIn {
+                dismiss() // Cierra esta vista para volver a LoginView, que luego será reemplazada por AuthManagerView
             }
         }
     }
@@ -99,6 +147,11 @@ struct SignUpView: View {
 
 struct SignUpView_Previews: PreviewProvider {
     static var previews: some View {
-        SignUpView()
+        // Para una preview correcta, ya que quitamos la NavView interna,
+        // es bueno embeberla en una para ver el título.
+        NavigationView {
+            SignUpView()
+        }
+        .accentColor(Color.accentColorTeal) // Para que la preview muestre bien los acentos
     }
 }

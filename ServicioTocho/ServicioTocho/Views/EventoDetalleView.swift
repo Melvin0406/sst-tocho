@@ -11,13 +11,10 @@ struct EventoDetalleView: View {
     let evento: Evento
     @ObservedObject var authViewModel: AuthenticationViewModel
 
-    // Propiedad computada para verificar si el usuario ya está unido
     private var isUserRegistered: Bool {
-        // 1. Asegurarnos de que evento.id (String?) no sea nil y no esté vacío
         guard let validEventID = evento.id, !validEventID.isEmpty else {
-            return false // No se puede estar registrado a un evento sin un ID válido
+            return false
         }
-        // 2. Llamar a la función del ViewModel con el String válido
         return authViewModel.isUserRegisteredForEvent(eventID: validEventID)
     }
 
@@ -28,134 +25,175 @@ struct EventoDetalleView: View {
         )
     }
 
+    // Inicializador para configurar la apariencia de la barra de navegación
+    // Similar a como lo hicimos en EventosListView
+    init(evento: Evento, authViewModel: AuthenticationViewModel) {
+        self.evento = evento
+        self.authViewModel = authViewModel
+
+        // Configuración de la apariencia de la barra de navegación
+        // Esto asegura que esta vista también siga el estilo si se presenta
+        // o si la configuración global no se aplicó completamente.
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(Color.appBackground) // Color de fondo de la barra
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.label] // Color del título (adaptable)
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.label] // Color del título grande (adaptable)
+
+        // Aplicar la apariencia
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
+        UINavigationBar.appearance().tintColor = UIColor(Color.accentColorTeal) // Color de los botones de la barra
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Título
-                Text(evento.nombre)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .padding(.top)
+        ZStack { // ZStack para el color de fondo
+            Color.appBackground.edgesIgnoringSafeArea(.all)
 
-                // Mapa
-                Map(coordinateRegion: .constant(region), annotationItems: [evento]) { eventoItem in
-                    MapMarker(coordinate: CLLocationCoordinate2D(latitude: eventoItem.latitud, longitude: eventoItem.longitud), tint: .blue)
-                }
-                .frame(height: 200)
-                .clipShape(RoundedRectangle(cornerRadius: 15))
-                .shadow(radius: 5)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Título del Evento - Podríamos moverlo a la barra de navegación
+                    // o mantenerlo aquí si preferimos un título grande en el contenido.
+                    // Por ahora, lo dejo aquí como lo tenías.
+                    Text(evento.nombre)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color.primary) // Usar color primario del sistema
+                        .padding(.top)
 
-                // Información general
-                VStack(alignment: .leading, spacing: 10) {
-                    InfoRow(label: "Organizador", value: evento.organizador ?? "No especificado")
-                    InfoRow(label: "Horas a liberar", value: evento.horasLiberadas?.description ?? "N/A")
-                    InfoRow(label: "Tipo", value: evento.tipo)
-                    InfoRow(label: "Ubicación", value: evento.ubicacionNombre)
-                    InfoRow(label: "Inicio", value: formatearFecha(evento.fechaInicio))
-                    InfoRow(label: "Fin", value: formatearFecha(evento.fechaFin))
-                    if let cupo = evento.cupoMaximo {
-                        InfoRow(label: "Cupo máximo", value: "\(cupo) personas")
-                    } else {
-                        InfoRow(label: "Cupo", value: "Ilimitado")
+                    // Mapa
+                    Map(coordinateRegion: .constant(region), annotationItems: [evento]) { eventoItem in
+                        MapMarker(coordinate: CLLocationCoordinate2D(latitude: eventoItem.latitud, longitude: eventoItem.longitud), tint: Color.accentColorTeal) // Usar color de acento
                     }
-                }
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                    .frame(height: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 15))
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // Sombra sutil
 
-                // Descripción
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Descripción")
-                        .font(.headline)
-                    Text(evento.descripcion)
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                }
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-
-                // Botón de Unirse/Cancelar Registro
-                Button(action: {
-                    // 1. Asegurarnos de que evento.id (String?) no sea nil y no esté vacío ANTES de la acción
-                    guard let validEventID = evento.id, !validEventID.isEmpty else {
-                        print("Error: ID de evento inválido. No se puede (des)registrar.")
-                        // Opcionalmente, mostrar una alerta al usuario
-                        return
+                    // Tarjeta de Información General
+                    VStack(alignment: .leading, spacing: 10) {
+                        InfoRow(label: "Organizador", value: evento.organizador ?? "No definido")
+                        InfoRow(label: "Horas a liberar", value: evento.horasLiberadas?.description ?? "N/A")
+                        InfoRow(label: "Tipo", value: evento.tipo)
+                        InfoRow(label: "Ubicación", value: evento.ubicacionNombre)
+                        InfoRow(label: "Inicio", value: formatearFecha(evento.fechaInicio))
+                        InfoRow(label: "Fin", value: formatearFecha(evento.fechaFin))
+                        if let cupo = evento.cupoMaximo {
+                            InfoRow(label: "Cupo máximo", value: "\(cupo) personas")
+                        } else {
+                            InfoRow(label: "Cupo", value: "Ilimitado")
+                        }
                     }
+                    .padding()
+                    .background(Color(UIColor.secondarySystemGroupedBackground)) // Un fondo ligeramente diferente al de la tarjeta de lista para diferenciar
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
 
-                    // 2. Usar el validEventID (String) para las funciones del ViewModel
-                    if isUserRegistered { // isUserRegistered ya usa la lógica correcta con validEventID
-                        authViewModel.unregisterUserFromEvent(eventID: validEventID)
-                    } else {
-                        authViewModel.registerUserForEvent(eventID: validEventID)
+
+                    // Tarjeta de Descripción
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Descripción")
+                            .font(.title3) // Un poco más grande para el título de sección
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color.primary)
+                        Text(evento.descripcion)
+                            .font(.body)
+                            .foregroundColor(Color.secondary) // Color secundario para el cuerpo de la descripción
                     }
-                }) {
-                    Text(isUserRegistered ? "Cancelar Registro" : "Unirme al Evento")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isUserRegistered ? Color.red : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                    .padding()
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
+
+
+                    // Botón de Unirse/Cancelar Registro
+                    Button(action: {
+                        guard let validEventID = evento.id, !validEventID.isEmpty else {
+                            print("Error: ID de evento inválido. No se puede (des)registrar.")
+                            return
+                        }
+                        if isUserRegistered {
+                            authViewModel.unregisterUserFromEvent(eventID: validEventID)
+                        } else {
+                            authViewModel.registerUserForEvent(eventID: validEventID)
+                        }
+                    }) {
+                        Text(isUserRegistered ? "Cancelar Registro" : "Unirme al Evento")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            // Usar el color de acento para la acción principal "Unirme"
+                            .background(isUserRegistered ? Color.red : Color.accentColorTeal)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .shadow(color: Color.black.opacity(0.15), radius: 5, x: 0, y: 3)
+                    }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
         }
-        .navigationTitle(evento.nombre)
-        .navigationBarTitleDisplayMode(.inline)
-        // El .onAppear que tenías antes puede permanecer si lo necesitas
+        .navigationTitle(evento.nombre) // El título se mostrará en la barra de navegación
+        .navigationBarTitleDisplayMode(.inline) // O .large si prefieres
+        .accentColor(Color.accentColorTeal) // Aplica el color de acento a los elementos de navegación (como el botón "Atrás")
+        // El .onAppear puede permanecer para cualquier lógica específica de esta vista
     }
 
     func formatearFecha(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        formatter.dateStyle = .long // Un poco más descriptivo
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 }
 
-// MARK: - Subvista para fila de información (sin cambios)
+// La subvista InfoRow no necesita cambios, pero asegúrate de que su 'value' pueda manejar texto más largo.
 struct InfoRow: View {
     var label: String
     var value: String
 
     var body: some View {
-        HStack(alignment: .top) {
-            Text("\(label):")
-                .fontWeight(.semibold)
-                .frame(width: 120, alignment: .leading)
+        VStack(alignment: .leading, spacing: 2) { // Menos espaciado interno
+            Text(label)
+                .font(.caption) // Más pequeño para la etiqueta
+                .fontWeight(.medium)
                 .foregroundColor(.secondary)
             Text(value)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .font(.callout) // Ligeramente más pequeño que .body pero legible
+                .foregroundColor(.primary)
         }
+        .padding(.vertical, 2) // Un poco de padding vertical para cada fila
     }
 }
 
-// MARK: - Preview (sin cambios respecto a la corrección anterior)
+// Preview
 struct EventoDetalleView_Previews: PreviewProvider {
     static var previews: some View {
         let mockEventoPreview = Evento(
-            id: "previewEvento123", // Ahora un String para el ID de @DocumentID
-            nombre: "Evento de Prueba Detalle",
-            descripcion: "Esta es una descripción larga y detallada del evento de prueba.",
-            tipo: "Social",
-            fechaInicio: Date(),
-            fechaFin: Date().addingTimeInterval(3600*2),
-            ubicacionNombre: "Lugar de Prueba, Calle Falsa 123",
-            latitud: 32.537,
-            longitud: -117.011,
-            organizador: "ONG Ejemplo", // Tu struct tiene organizador como String, no String?
-            cupoMaximo: 30,
-            horasLiberadas: 5
+            id: "previewEvento123",
+            nombre: "Conferencia sobre Sostenibilidad Urbana",
+            descripcion: "Una charla inspiradora sobre cómo podemos contribuir a crear ciudades más verdes y sostenibles para el futuro. Contaremos con expertos en urbanismo y ecología.",
+            tipo: "Educativo",
+            fechaInicio: Date().addingTimeInterval(3600*24*3), // En 3 días
+            fechaFin: Date().addingTimeInterval(3600*24*3 + 3600*2), // Dura 2 horas
+            ubicacionNombre: "Auditorio Municipal, Av. Revolución 123, Centro",
+            latitud: 32.530,
+            longitud: -117.042,
+            organizador: "Ciudad Futura ONG",
+            cupoMaximo: 150,
+            horasLiberadas: 2
         )
         let mockAuthViewModel = AuthenticationViewModel()
-        // Para simular que el usuario está registrado en la preview:
-        // mockAuthViewModel.userProfile = UserProfile(id: "testUID", username: "TestUser", email: "test@example.com", registeredEventIDs: ["previewEvento123"])
+        // Para simular que el usuario está registrado:
+        // mockAuthViewModel.userProfile = UserProfile(id:"simulatedUser", nombreCompleto: "Usuario Preview", email: "preview@example.com", registeredEventIDs: [mockEventoPreview.id!])
 
+        // Para ver el diseño aplicado, es importante que EventoDetalleView esté dentro de una NavigationView
+        // ya que estamos configurando la apariencia de la barra de navegación.
         NavigationView {
             EventoDetalleView(evento: mockEventoPreview, authViewModel: mockAuthViewModel)
         }
+        // Si tienes definida tu extensión de Color y los colores en Assets:
+        // .environment(\.colorScheme, .light) // Para probar con light mode
+        // .environment(\.colorScheme, .dark) // Para probar con dark mode
     }
 }
