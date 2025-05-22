@@ -15,7 +15,6 @@ struct UserProfile: Identifiable, Codable, Equatable {
     var horasAcumuladas: Double = 0.0
     var registeredEventIDs: [String]? = []
 
-    // Inicializador actualizado
     init(id: String? = nil,
          nombreCompleto: String,
          email: String,

@@ -206,7 +206,7 @@ let mockEventos: [Evento] = [
             cupoMaximo: 25,
             horasLiberadas: 20
     ),
-    Evento(
+        Evento(
         id: "d2832bae-9627-4ee6-abee-302e82da72b1",
         nombre: "Apoyo en la Elaboración de Despensas",
             descripcion: "Ayuda a armar despensas con alimentos no perecederos para familias de bajos recursos en la comunidad.",
