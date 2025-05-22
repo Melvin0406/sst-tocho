@@ -16,14 +16,14 @@ struct LoginView: View {
 
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(Color.appBackground) // Fondo de la barra
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.label] // Color de título adaptable
+        appearance.backgroundColor = UIColor(Color.appBackground)
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.label]
         appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.label]
 
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().tintColor = UIColor(Color.accentColorTeal) // Color de botones/iconos de la barra
+        UINavigationBar.appearance().tintColor = UIColor(Color.accentColorTeal)
     }
 
     var body: some View {
@@ -31,11 +31,9 @@ struct LoginView: View {
             ZStack {
                 Color.appBackground.edgesIgnoringSafeArea(.all)
 
-                ScrollView { // Para asegurar que el contenido sea scrolleable en pantallas pequeñas
-                    VStack(spacing: 25) { // Aumentamos un poco el espaciado general
-                        
-                        // Icono/Logo de la App (Placeholder)
-                        Image(systemName: "hand.raised.heart.fill") // Un icono relacionado con voluntariado
+                ScrollView {
+                    VStack(spacing: 25) {
+                        Image(systemName: "hand.raised.heart.fill")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 80, height: 80)
@@ -44,7 +42,7 @@ struct LoginView: View {
                             .padding(.bottom, 10)
 
                         Text("Bienvenido a VoluntariadoApp")
-                            .font(.title2) // Un poco más pequeño para balancear con el icono
+                            .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(Color.primary)
                             .padding(.bottom, 30)
@@ -63,11 +61,11 @@ struct LoginView: View {
                                     .disableAutocorrection(true)
                             }
                             .padding(12)
-                            .background(Color(UIColor.secondarySystemGroupedBackground)) // Fondo más sutil
+                            .background(Color(UIColor.secondarySystemGroupedBackground))
                             .cornerRadius(10)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 10)
-                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1) // Borde sutil
+                                    .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                             )
                         }
                         
@@ -93,7 +91,7 @@ struct LoginView: View {
                         if let errorMessage = authViewModel.errorMessage {
                             Text(errorMessage)
                                 .foregroundColor(.red)
-                                .font(.footnote) // Un poco más pequeño
+                                .font(.footnote)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
                         }
@@ -106,29 +104,27 @@ struct LoginView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.accentColorTeal) // Usar color de acento
+                                .background(Color.accentColorTeal)
                                 .cornerRadius(10)
                                 .shadow(color: Color.accentColorTeal.opacity(0.4), radius: 5, x: 0, y: 3)
                         }
-                        .padding(.top, 10) // Espacio antes del botón
+                        .padding(.top, 10)
 
                         NavigationLink(destination: SignUpView()) {
                             Text("¿No tienes cuenta? Regístrate")
                                 .fontWeight(.medium)
-                                // El color debería ser tomado del .accentColor de la NavigationView
                         }
                         .padding(.top, 5)
                         
                         Spacer() // Para empujar el contenido si la pantalla es grande
 
                     }
-                    .padding(.horizontal, 30) // Padding horizontal para el contenido del VStack
+                    .padding(.horizontal, 30)
                 }
             }
             .navigationTitle("Acceso")
-            // .navigationBarHidden(true) // Descomenta si NO quieres la barra de navegación aquí
         }
-        .accentColor(Color.accentColorTeal) // Aplica el color de acento a toda la NavigationView
+        .accentColor(Color.accentColorTeal) 
     }
 }
 

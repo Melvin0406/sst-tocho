@@ -21,7 +21,7 @@ struct LogHoursView: View {
         self.evento = evento
         self.authViewModel = authViewModel
 
-        // Configuración de la apariencia de la barra de navegación (como la tenías)
+        // Configuración de la apariencia de la barra de navegación
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(Color.appBackground)
@@ -52,10 +52,10 @@ struct LogHoursView: View {
                         Text("Horas Completadas")
                             .font(.headline)
                             .foregroundColor(Color.primary)
-                        HStack { // Añadido HStack para posible icono o unidad
-                            Image(systemName: "hourglass") // Icono opcional
+                        HStack {
+                            Image(systemName: "hourglass")
                                 .foregroundColor(Color.accentColorTeal)
-                            TextField("Ej: 3 ó 3.5", text: $horasReportadasStr) // Placeholder actualizado
+                            TextField("Ej: 3 ó 3.5", text: $horasReportadasStr)
                                 .keyboardType(.decimalPad)
                         }
                         .padding(12)
@@ -125,7 +125,6 @@ struct LogHoursView: View {
     }
 
     private func submitHours() {
-        // La validación y conversión a Double permanecen igual
         guard let horas = Double(horasReportadasStr), horas > 0 else {
             mensajeError = "Por favor, ingresa un número válido de horas (mayor a 0)."
             mostrarError = true
@@ -142,7 +141,7 @@ struct LogHoursView: View {
 
         authViewModel.logHoursForEvent(
             eventoID: eventoID,
-            horas: horas, // Se envía como Double
+            horas: horas, 
             descripcion: descripcionActividad.isEmpty ? nil : descripcionActividad
         ) { success, error in
             if success {

@@ -10,10 +10,10 @@ import Foundation
 
 struct RegistroHora: Identifiable, Codable {
     var id = UUID()
-    var idEvento: String? // Necesitará que Evento.swift exista y esté correcto
-    var idUsuario: String? // Necesitará que Usuario.swift exista y esté correcto
+    var idEvento: String?
+    var idUsuario: String?
     var fecha: Date
     var horasReportadas: Double
-    var aprobado: Bool = false // Para la validación por parte de un administrador
-    var descripcionActividad: String? // Opcional, para que el estudiante detalle qué hizo
+    var aprobado: Bool = false
+    var descripcionActividad: String? 
 }

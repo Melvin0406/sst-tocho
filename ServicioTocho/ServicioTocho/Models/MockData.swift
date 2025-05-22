@@ -5,7 +5,7 @@
 //  Created by CETYS Universidad  on 12/05/25.
 //
 
-import Foundation // Necesitamos Foundation para Date
+import Foundation 
 import CoreLocation // Para las coordenadas
 
 // Datos de ejemplo para Eventos

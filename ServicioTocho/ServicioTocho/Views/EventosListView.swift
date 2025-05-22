@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct EventosListView: View {
-    @State var eventos: [Evento] = mockEventos // Tus datos de ejemplo o los que cargues
+    @State var eventos: [Evento] = mockEventos
     @StateObject var filtro = EventoFiltro()
     @State private var mostrarFiltro = false
     @ObservedObject var authViewModel: AuthenticationViewModel
@@ -18,11 +18,11 @@ struct EventosListView: View {
     }
 
     var eventosFiltrados: [Evento] {
-        // 1. Obtener los IDs de eventos para los cuales ya se registraron horas
+        // Obtener los IDs de eventos para los cuales ya se registraron horas
         let idsEventosConHorasYaRegistradas = Set(authViewModel.misRegistrosDeHoras.compactMap { $0.idEvento })
 
         return eventos.filter { evento in
-            // 2. Condición para excluir eventos si ya se registraron horas para ellos
+            // Condición para excluir eventos si ya se registraron horas para ellos
             guard let currentEventoID = evento.id, !currentEventoID.isEmpty else {
                 return false // Excluir eventos sin ID válido
             }
@@ -30,7 +30,7 @@ struct EventosListView: View {
                 return false // Si ya se registraron horas para este evento, no mostrarlo en esta lista
             }
 
-            // --- Tus Filtros Existentes (sin cambios) ---
+            // Filtros Existentes
             let filtroTipo = (filtro.tipoSeleccionado == "Todos" || evento.tipo == filtro.tipoSeleccionado)
             
             let filtroFechaDesde = Calendar.current.compare(evento.fechaInicio, to: filtro.fechaDesde, toGranularity: .day) != .orderedAscending
@@ -38,9 +38,7 @@ struct EventosListView: View {
             
             let filtroUbicacion = (filtro.ubicacion.isEmpty || evento.ubicacionNombre.localizedCaseInsensitiveContains(filtro.ubicacion))
             
-            var isActuallyRegisteredForThisEvent = false // Para el filtro "solo unidos"
-            // Nota: 'isActuallyRegisteredForThisEvent' se refiere a si está en 'userProfile.registeredEventIDs'
-            // No necesariamente implica que ya registró horas.
+            var isActuallyRegisteredForThisEvent = false
             if let validEventID = evento.id, !validEventID.isEmpty {
                 isActuallyRegisteredForThisEvent = authViewModel.isUserRegisteredForEvent(eventID: validEventID)
             }
@@ -50,7 +48,6 @@ struct EventosListView: View {
         }
     }
 
-    // El init para la apariencia de la barra de navegación (como lo tenías)
     init(authViewModel: AuthenticationViewModel) {
         self.authViewModel = authViewModel
         
@@ -73,7 +70,6 @@ struct EventosListView: View {
 
                 Group {
                     if eventosFiltrados.isEmpty {
-                        // ... (tu vista de "No hay eventos disponibles", sin cambios)
                         VStack {
                             Spacer()
                             Image(systemName: "calendar.badge.exclamationmark")
@@ -114,7 +110,6 @@ struct EventosListView: View {
             }
             .navigationTitle("Próximos Eventos")
             .toolbar {
-                // ... (tus botones de toolbar, sin cambios) ...
                 ToolbarItem(placement: .navigationBarLeading) {
                     NavigationLink(destination: ProfileView(authViewModel: authViewModel)) {
                         Image(systemName: "person.circle.fill")
@@ -132,11 +127,9 @@ struct EventosListView: View {
                 FiltroEventosView(filtro: filtro, tiposDeEventosDisponibles: tiposDeEventos)
             }
             .onAppear {
-                // Asegurarse de que tanto el perfil como el historial de horas estén cargados
                 if authViewModel.userProfile == nil, let uid = authViewModel.currentUser()?.uid {
                     authViewModel.fetchUserProfile(uid: uid)
                 }
-                // Es importante que misRegistrosDeHoras esté actualizado para el filtro
                 authViewModel.fetchMisRegistrosDeHoras()
             }
         }

@@ -36,15 +36,11 @@ class AuthenticationViewModel: ObservableObject {
                     self.userProfile = nil // Limpiar perfil al cerrar sesión
                     self.misRegistrosDeHoras = []
                 }
-                // Limpiar mensajes de error al cambiar el estado de autenticación
-                // Podrías decidir si quieres limpiar el errorMessage aquí o no,
-                // ya que un error de login anterior podría ser relevante.
-                // self.errorMessage = nil
             }
         }
     }
 
-    // Nueva función para cargar el perfil del usuario desde Firestore
+    // Función para cargar el perfil del usuario desde Firestore
     func fetchUserProfile(uid: String) {
         db.collection("users").document(uid).getDocument { (documentSnapshot, error) in
             DispatchQueue.main.async {
@@ -58,32 +54,18 @@ class AuthenticationViewModel: ObservableObject {
 
                 if let document = documentSnapshot, document.exists {
                     do {
-                        // Intenta decodificar el documento a tu struct UserProfile
                         self.userProfile = try document.data(as: UserProfile.self)
                         print("Perfil de usuario cargado: \(self.userProfile?.nombreCompleto ?? "N/A")")
                         print("Eventos registrados: \(self.userProfile?.registeredEventIDs ?? [])")
-                        // Si necesitas actualizar alguna otra UI basada en el perfil cargado, puedes hacerlo aquí
-                        // o emitir una notificación/actualización adicional si es complejo.
                     } catch {
                         print("Error al decodificar perfil de usuario: \(error.localizedDescription)")
                         self.errorMessage = "Error al leer datos del perfil."
-                        self.userProfile = nil // Asegúrate de limpiar el perfil si hay error de decodificación
+                        self.userProfile = nil
                     }
                 } else {
                     print("Documento de perfil no existe en Firestore para UID: \(uid).")
-                    // Esto es importante: el usuario está autenticado en Firebase Auth,
-                    // pero no tiene un documento de perfil en Firestore.
-                    // Esto podría ocurrir si el proceso de creación del perfil falló después del registro en Auth,
-                    // o si es un usuario antiguo antes de que implementaras esta lógica de perfiles.
-                    // Podrías decidir crear un perfil por defecto aquí.
                     self.errorMessage = "Perfil de usuario no encontrado en la base de datos."
                     self.userProfile = nil
-
-                    // Opcional: Lógica para crear un perfil por defecto si no existe
-                    // if Auth.auth().currentUser != nil { // Solo si el usuario está realmente logueado
-                    //    print("Intentando crear perfil por defecto para usuario existente sin perfil en Firestore.")
-                    //    // self.createDefaultProfileForCurrentUser() // Implementar esta función si es necesario
-                    // }
                 }
             }
         }
@@ -129,14 +111,12 @@ class AuthenticationViewModel: ObservableObject {
                         } else {
                             print("Usuario creado en Auth y perfil guardado en Firestore.")
                             self.userProfile = newUserProfile // Actualiza el perfil localmente
-                            // userIsLoggedIn será actualizado por el listener, lo que refrescará la UI
                         }
                     }
                 }
             } catch let error {
                 DispatchQueue.main.async {
                     self.errorMessage = "Error al preparar datos del perfil: \(error.localizedDescription)"
-                    // Considera eliminar el usuario de Auth aquí también
                 }
             }
         }
@@ -163,11 +143,7 @@ class AuthenticationViewModel: ObservableObject {
 
     func signOut() {
         do {
-            // Antes de cerrar sesión, podrías limpiar el username si lo deseas,
-            // o simplemente dejarlo en UserDefaults. Si otro usuario inicia sesión en el mismo dispositivo,
-            // se buscará su propio username basado en su UID.
             try Auth.auth().signOut()
-            // self.userIsLoggedIn se actualizará por el listener
             self.email = "" // Limpiar campos del ViewModel
             self.password = ""
             self.errorMessage = nil
@@ -209,7 +185,6 @@ class AuthenticationViewModel: ObservableObject {
                     if self.userProfile?.registeredEventIDs?.contains(eventID) == false {
                         self.userProfile?.registeredEventIDs?.append(eventID)
                     }
-                    // self.objectWillChange.send() // Forzar actualización si es necesario, aunque @Published debería hacerlo
                 }
             }
         }
@@ -231,7 +206,6 @@ class AuthenticationViewModel: ObservableObject {
                     print("Registro al evento \(eventID) cancelado exitosamente.")
                     // Actualizar el userProfile local
                     self.userProfile?.registeredEventIDs?.removeAll(where: { $0 == eventID })
-                    // self.objectWillChange.send()
                 }
             }
         }
@@ -245,14 +219,13 @@ class AuthenticationViewModel: ObservableObject {
     func fetchMisRegistrosDeHoras() {
         guard let userID = Auth.auth().currentUser?.uid else {
             print("Usuario no autenticado, no se pueden cargar los registros de horas.")
-            // Considera limpiar misRegistrosDeHoras si el usuario cierra sesión
-            // self.misRegistrosDeHoras = []
+            
             return
         }
 
         db.collection("registros_horas")
           .whereField("idUsuario", isEqualTo: userID)
-          .order(by: "fecha", descending: true) // Opcional: ordenar por fecha de registro
+          .order(by: "fecha", descending: true)
           .getDocuments { querySnapshot, error in
             DispatchQueue.main.async {
                 if let error = error {
@@ -294,11 +267,8 @@ class AuthenticationViewModel: ObservableObject {
             return
         }
 
-        // 1. Crear el objeto RegistroHora
+        // Crear el objeto RegistroHora
         let nuevoRegistro = RegistroHora(
-            // id se genera automáticamente si es UUID, o se asigna por Firestore si es String y @DocumentID
-            // Aquí asumimos que el id de RegistroHora será generado por Firestore si es @DocumentID String?
-            // o se auto-genera si es UUID. Por ahora, el modelo tiene var id = UUID()
             idEvento: eventoID,
             idUsuario: userID,
             fecha: Date(), // Fecha actual del registro
@@ -307,11 +277,7 @@ class AuthenticationViewModel: ObservableObject {
             descripcionActividad: descripcion
         )
 
-        // 2. Guardar el RegistroHora en Firestore (nueva colección "registros_horas")
-        // Usamos un bloque de lote (batch) para asegurar que ambas operaciones (guardar registro y actualizar perfil)
-        // se completen o fallen juntas, si es posible y deseado.
-        // Por simplicidad, haremos operaciones separadas con manejo de errores individual.
-
+        // Guardar el RegistroHora en Firestore (nueva colección "registros_horas")
         let registroRef = db.collection("registros_horas").document() // Firestore genera el ID para el nuevo registro
 
         do {
@@ -326,32 +292,23 @@ class AuthenticationViewModel: ObservableObject {
 
                 print("RegistroHora guardado exitosamente con ID: \(registroRef.documentID)")
 
-                // --- INICIO DE LA ACTUALIZACIÓN IMPORTANTE ---
-                // 1. Actualización optimista local de misRegistrosDeHoras
-                // Esto hará que la UI reaccione más rápido.
-                // Es importante que RegistroHora sea Equatable si quieres evitar duplicados exactos
-                // o maneja la inserción/actualización con cuidado.
-                // Como fetchMisRegistrosDeHoras() se llamará después, esto se sincronizará.
                 DispatchQueue.main.async {
                                 // Creamos una nueva copia del array, añadimos el nuevo registro,
                                 // y luego reasignamos la propiedad @Published.
-                                // Esto tiende a ser una señal más clara para SwiftUI de que el array ha cambiado.
                                 var nuevosRegistros = self.misRegistrosDeHoras
-                                nuevosRegistros.append(nuevoRegistro) // O insert(at: 0) si prefieres al inicio
+                                nuevosRegistros.append(nuevoRegistro)
                                 self.misRegistrosDeHoras = nuevosRegistros
                                 print("ViewModel: misRegistrosDeHoras actualizado localmente (optimista). Nuevo count: \(self.misRegistrosDeHoras.count)")
                             }
 
 
-                // 2. Actualizar horasAcumuladas en UserProfile en Firestore
+                // Actualizar horasAcumuladas en UserProfile en Firestore
                 // Obtenemos las horas acumuladas actuales del userProfile local o volvemos a pedirlas.
-                // Es más seguro usar las horas del perfil que ya tenemos, si está actualizado.
                 let horasActuales = self.userProfile?.horasAcumuladas ?? 0.0
                 let nuevasHorasAcumuladas = horasActuales + horas
                 
                 self.db.collection("users").document(userID).updateData([
                     "horasAcumuladas": nuevasHorasAcumuladas
-                    // Aquí NO vamos a modificar registeredEventIDs directamente en Firestore.
                     // La lógica de si un evento está "pendiente de horas" o "en historial"
                     // se basa en si existe un RegistroHora para él, no en quitarlo de registeredEventIDs.
                     // Un usuario sigue "registrado" a un evento incluso después de cargar horas.
@@ -359,13 +316,11 @@ class AuthenticationViewModel: ObservableObject {
                     DispatchQueue.main.async {
                         if let error = error {
                             print("Error al actualizar horas acumuladas: \(error.localizedDescription)")
-                            // Revertir la actualización optimista de misRegistrosDeHoras si es necesario,
-                            // aunque el fetch posterior lo corregirá.
+                            // Revertir la actualización optimista de misRegistrosDeHoras si es necesario
                             self.misRegistrosDeHoras.removeAll(where: { $0.id == nuevoRegistro.id }) // Revierte si el ID de nuevoRegistro es estable
                             completion(false, "Registro guardado, pero error al actualizar horas totales: \(error.localizedDescription)")
                         } else {
                             print("Horas acumuladas actualizadas exitosamente.")
-                            // Es crucial recargar AMBOS para asegurar consistencia total con Firestore.
                             self.fetchUserProfile(uid: userID)       // Actualiza userProfile (incluye horasAcumuladas)
                             self.fetchMisRegistrosDeHoras()      // Actualiza la lista de todos los registros
                             completion(true, nil)
@@ -395,20 +350,20 @@ class AuthenticationViewModel: ObservableObject {
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = pdfMetaData as [String: Any]
 
-        let pageWidth: CGFloat = 8.27 * 72.0  // A4 Ancho en puntos (1 pulgada = 72 puntos)
-        let pageHeight: CGFloat = 11.69 * 72.0 // A4 Alto en puntos
+        let pageWidth: CGFloat = 8.27 * 72.0
+        let pageHeight: CGFloat = 11.69 * 72.0
         let pageRect = CGRect(x: 0, y: 0, width: pageWidth, height: pageHeight)
 
-        let margin: CGFloat = 0.75 * 72.0 // Margen de 0.75 pulgadas
+        let margin: CGFloat = 0.75 * 72.0
         let contentWidth = pageWidth - (2 * margin)
 
         let renderer = UIGraphicsPDFRenderer(bounds: pageRect, format: format)
 
         let data = renderer.pdfData { (context) in
             var currentPage = 0
-            var yPosition: CGFloat = margin // Posición Y actual para dibujar
+            var yPosition: CGFloat = margin
 
-            // --- Función para dibujar encabezado de página ---
+            // Función para dibujar encabezado de página
             let drawPageHeader = {
                 yPosition = margin // Reiniciar Y para cada nueva página
 
@@ -443,12 +398,12 @@ class AuthenticationViewModel: ObservableObject {
                 yPosition += 15
             }
 
-            // --- Función para dibujar pie de página ---
+            // Función para dibujar pie de página
             let drawPageFooter = { (pageNum: Int) in
                 let footerFont = UIFont.systemFont(ofSize: 9)
                 let pageText = "Página \(pageNum)"
                 let pageSize = pageText.size(withAttributes: [.font: footerFont])
-                pageText.draw(at: CGPoint(x: pageWidth - margin - pageSize.width, y: pageHeight - margin + 10), // Ligeramente fuera del margen inferior
+                pageText.draw(at: CGPoint(x: pageWidth - margin - pageSize.width, y: pageHeight - margin + 10),
                               withAttributes: [.font: footerFont, .foregroundColor: UIColor.gray])
             }
 
@@ -484,7 +439,7 @@ class AuthenticationViewModel: ObservableObject {
                 entryHeightEstimate += 10 // Padding inferior para la entrada
 
                 // Comprobar si necesitamos una nueva página
-                if yPosition + entryHeightEstimate > (pageHeight - margin - 20) { // -20 para un poco de espacio antes del pie
+                if yPosition + entryHeightEstimate > (pageHeight - margin - 20) {
                     context.beginPage()
                     currentPage += 1
                     drawPageHeader()
@@ -492,7 +447,7 @@ class AuthenticationViewModel: ObservableObject {
                 }
 
                 // Dibujar Nombre del Evento
-                eventNameAttrString.draw(in: CGRect(x: margin, y: yPosition, width: contentWidth, height: 100)) // Altura grande para que quepa
+                eventNameAttrString.draw(in: CGRect(x: margin, y: yPosition, width: contentWidth, height: 100)) 
                 yPosition += eventNameAttrString.boundingRect(with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil).height + 3
 
                 // Dibujar Horas

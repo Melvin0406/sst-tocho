@@ -19,7 +19,6 @@ struct HorasReportView: View {
     init(authViewModel: AuthenticationViewModel, todosLosEventos: [Evento]) {
         self.authViewModel = authViewModel
         self.todosLosEventos = todosLosEventos
-        // ... (tu código de apariencia de UINavigationBar)
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(Color.appBackground)
@@ -30,11 +29,11 @@ struct HorasReportView: View {
         UINavigationBar.appearance().tintColor = UIColor(Color.accentColorTeal)
     }
     
-    private func getEvento(byId eventoId: String?) -> Evento? { /* ... (como la tenías) ... */
+    private func getEvento(byId eventoId: String?) -> Evento? {
         guard let eventoId = eventoId else { return nil }
         return todosLosEventos.first { $0.id == eventoId }
     }
-    private func formatearFecha(_ date: Date, estilo: DateFormatter.Style = .long) -> String { /* ... (como la tenías) ... */
+    private func formatearFecha(_ date: Date, estilo: DateFormatter.Style = .long) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = estilo
         formatter.timeStyle = .none
@@ -46,7 +45,6 @@ struct HorasReportView: View {
             Color.appBackground.edgesIgnoringSafeArea(.all)
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // ... (Contenido del reporte como lo tenías: Encabezado, Info Estudiante, Detalle Participaciones) ...
                     VStack(alignment: .center, spacing: 8) { Image(systemName: "scroll.fill").font(.system(size: 50)).foregroundColor(Color.accentColorTeal); Text("Reporte de Horas de Servicio Social").font(.title2).fontWeight(.bold).multilineTextAlignment(.center); Text("Emitido: \(formatearFecha(Date()))").font(.caption).foregroundColor(.secondary); }.frame(maxWidth: .infinity).padding(.vertical)
                     Divider()
                     VStack(alignment: .leading, spacing: 8) { Text("Estudiante:").font(.headline).foregroundColor(Color.accentColorTeal); Text(authViewModel.userProfile?.nombreCompleto ?? "N/A").font(.title3); Text("Correo: \(authViewModel.userProfile?.email ?? "N/A")").font(.subheadline).foregroundColor(.secondary); Text("Total de Horas Acumuladas: \(String(format: "%.1f", authViewModel.userProfile?.horasAcumuladas ?? 0.0)) horas").font(.headline).padding(.top, 5); }.padding().background(Color(UIColor.secondarySystemGroupedBackground)).cornerRadius(10).padding(.bottom)
@@ -89,8 +87,6 @@ struct HorasReportView: View {
             if let pdfURL = urlDelPDFCompartir {
                 ShareSheet(activityItems: [pdfURL])
             } else {
-                // Esto no debería mostrarse si la lógica es correcta,
-                // pero es un fallback por si acaso.
                 VStack {
                     Text("Preparando PDF...")
                     ProgressView()
@@ -107,15 +103,12 @@ struct HorasReportView: View {
         }
     }
 
-    // --- Nueva función para generar y preparar para compartir ---
-    @MainActor // Asegura que las actualizaciones de @State se hagan en el hilo principal
+    @MainActor
     private func generarYCompartirPDF() async {
         isGeneratingPDF = true
         pdfErrorAlertMessage = nil // Limpiar errores previos
         urlDelPDFCompartir = nil   // Limpiar URL previa
 
-        // La generación del PDF puede ser intensiva, la mantenemos así por ahora
-        // Si se vuelve muy lenta, se podría investigar mover partes a un actor background.
         guard let pdfData = authViewModel.generarReportePDFDatos(eventos: todosLosEventos) else {
             pdfErrorAlertMessage = "No se pudieron generar los datos del PDF. Asegúrate de tener horas registradas."
             print(pdfErrorAlertMessage!)
@@ -152,8 +145,7 @@ struct HorasReportView: View {
         }
     }
 
-    // La subvista ParticipationDetailCard sigue igual
-    struct ParticipationDetailCard: View { /* ... (como la tenías) ... */
+    struct ParticipationDetailCard: View {
         let evento: Evento
         let registroHora: RegistroHora
         private func formatearFecha(_ date: Date, estilo: DateFormatter.Style = .medium) -> String { let formatter = DateFormatter(); formatter.dateStyle = estilo; formatter.timeStyle = .short; return formatter.string(from: date) }
@@ -162,8 +154,8 @@ struct HorasReportView: View {
 }
 
 
-// ShareSheet y Preview siguen igual que en mi respuesta anterior
-struct ShareSheet: UIViewControllerRepresentable { /* ... */
+
+struct ShareSheet: UIViewControllerRepresentable { 
     var activityItems: [Any]
     var applicationActivities: [UIActivity]? = nil
     func makeUIViewController(context: Context) -> UIActivityViewController { let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities); return controller; }

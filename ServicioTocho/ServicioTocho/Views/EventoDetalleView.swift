@@ -26,25 +26,21 @@ struct EventoDetalleView: View {
     }
 
     // Inicializador para configurar la apariencia de la barra de navegación
-    // Similar a como lo hicimos en EventosListView
     init(evento: Evento, authViewModel: AuthenticationViewModel) {
         self.evento = evento
         self.authViewModel = authViewModel
 
-        // Configuración de la apariencia de la barra de navegación
-        // Esto asegura que esta vista también siga el estilo si se presenta
-        // o si la configuración global no se aplicó completamente.
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(Color.appBackground) // Color de fondo de la barra
-        appearance.titleTextAttributes = [.foregroundColor: UIColor.label] // Color del título (adaptable)
-        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.label] // Color del título grande (adaptable)
+        appearance.backgroundColor = UIColor(Color.appBackground)
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.label]
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.label]
 
         // Aplicar la apariencia
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().scrollEdgeAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().tintColor = UIColor(Color.accentColorTeal) // Color de los botones de la barra
+        UINavigationBar.appearance().tintColor = UIColor(Color.accentColorTeal)
     }
 
     var body: some View {
@@ -53,22 +49,19 @@ struct EventoDetalleView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Título del Evento - Podríamos moverlo a la barra de navegación
-                    // o mantenerlo aquí si preferimos un título grande en el contenido.
-                    // Por ahora, lo dejo aquí como lo tenías.
                     Text(evento.nombre)
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(Color.primary) // Usar color primario del sistema
+                        .foregroundColor(Color.primary)
                         .padding(.top)
 
                     // Mapa
                     Map(coordinateRegion: .constant(region), annotationItems: [evento]) { eventoItem in
-                        MapMarker(coordinate: CLLocationCoordinate2D(latitude: eventoItem.latitud, longitude: eventoItem.longitud), tint: Color.accentColorTeal) // Usar color de acento
+                        MapMarker(coordinate: CLLocationCoordinate2D(latitude: eventoItem.latitud, longitude: eventoItem.longitud), tint: Color.accentColorTeal)
                     }
                     .frame(height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: 15))
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2) // Sombra sutil
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
 
                     // Tarjeta de Información General
                     VStack(alignment: .leading, spacing: 10) {
@@ -85,7 +78,7 @@ struct EventoDetalleView: View {
                         }
                     }
                     .padding()
-                    .background(Color(UIColor.secondarySystemGroupedBackground)) // Un fondo ligeramente diferente al de la tarjeta de lista para diferenciar
+                    .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(12)
                     .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 1)
 
@@ -93,12 +86,12 @@ struct EventoDetalleView: View {
                     // Tarjeta de Descripción
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Descripción")
-                            .font(.title3) // Un poco más grande para el título de sección
+                            .font(.title3)
                             .fontWeight(.semibold)
                             .foregroundColor(Color.primary)
                         Text(evento.descripcion)
                             .font(.body)
-                            .foregroundColor(Color.secondary) // Color secundario para el cuerpo de la descripción
+                            .foregroundColor(Color.secondary)
                     }
                     .padding()
                     .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -122,7 +115,6 @@ struct EventoDetalleView: View {
                             .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            // Usar el color de acento para la acción principal "Unirme"
                             .background(isUserRegistered ? Color.red : Color.accentColorTeal)
                             .foregroundColor(.white)
                             .cornerRadius(10)
@@ -133,36 +125,35 @@ struct EventoDetalleView: View {
                 .padding(.horizontal)
             }
         }
-        .navigationTitle(evento.nombre) // El título se mostrará en la barra de navegación
-        .navigationBarTitleDisplayMode(.inline) // O .large si prefieres
-        .accentColor(Color.accentColorTeal) // Aplica el color de acento a los elementos de navegación (como el botón "Atrás")
-        // El .onAppear puede permanecer para cualquier lógica específica de esta vista
+        .navigationTitle(evento.nombre)
+        .navigationBarTitleDisplayMode(.inline)
+        .accentColor(Color.accentColorTeal)
     }
 
     func formatearFecha(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .long // Un poco más descriptivo
+        formatter.dateStyle = .long
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 }
 
-// La subvista InfoRow no necesita cambios, pero asegúrate de que su 'value' pueda manejar texto más largo.
+
 struct InfoRow: View {
     var label: String
     var value: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) { // Menos espaciado interno
+        VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .font(.caption) // Más pequeño para la etiqueta
+                .font(.caption)
                 .fontWeight(.medium)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.callout) // Ligeramente más pequeño que .body pero legible
+                .font(.callout)
                 .foregroundColor(.primary)
         }
-        .padding(.vertical, 2) // Un poco de padding vertical para cada fila
+        .padding(.vertical, 2)
     }
 }
 
@@ -174,8 +165,8 @@ struct EventoDetalleView_Previews: PreviewProvider {
             nombre: "Conferencia sobre Sostenibilidad Urbana",
             descripcion: "Una charla inspiradora sobre cómo podemos contribuir a crear ciudades más verdes y sostenibles para el futuro. Contaremos con expertos en urbanismo y ecología.",
             tipo: "Educativo",
-            fechaInicio: Date().addingTimeInterval(3600*24*3), // En 3 días
-            fechaFin: Date().addingTimeInterval(3600*24*3 + 3600*2), // Dura 2 horas
+            fechaInicio: Date().addingTimeInterval(3600*24*3),
+            fechaFin: Date().addingTimeInterval(3600*24*3 + 3600*2),
             ubicacionNombre: "Auditorio Municipal, Av. Revolución 123, Centro",
             latitud: 32.530,
             longitud: -117.042,
@@ -184,16 +175,9 @@ struct EventoDetalleView_Previews: PreviewProvider {
             horasLiberadas: 2
         )
         let mockAuthViewModel = AuthenticationViewModel()
-        // Para simular que el usuario está registrado:
-        // mockAuthViewModel.userProfile = UserProfile(id:"simulatedUser", nombreCompleto: "Usuario Preview", email: "preview@example.com", registeredEventIDs: [mockEventoPreview.id!])
-
-        // Para ver el diseño aplicado, es importante que EventoDetalleView esté dentro de una NavigationView
-        // ya que estamos configurando la apariencia de la barra de navegación.
+        
         NavigationView {
             EventoDetalleView(evento: mockEventoPreview, authViewModel: mockAuthViewModel)
         }
-        // Si tienes definida tu extensión de Color y los colores en Assets:
-        // .environment(\.colorScheme, .light) // Para probar con light mode
-        // .environment(\.colorScheme, .dark) // Para probar con dark mode
     }
 }

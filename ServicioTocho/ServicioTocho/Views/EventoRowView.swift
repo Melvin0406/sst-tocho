@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EventoRowView: View {
     let evento: Evento
-    @ObservedObject var authViewModel: AuthenticationViewModel // Necesario para el estado de "unido"
+    @ObservedObject var authViewModel: AuthenticationViewModel
 
     private var isUserRegistered: Bool {
         guard let eventID = evento.id, !eventID.isEmpty else { return false }
@@ -17,8 +17,7 @@ struct EventoRowView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) { // Usamos spacing 0 y gestionamos con Paddings
-            // Sección de Encabezado de la Tarjeta (ej. con icono y tipo)
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 VStack(alignment: .leading) {
                     Text(evento.tipo)
@@ -27,13 +26,13 @@ struct EventoRowView: View {
                         .foregroundColor(.white)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(colorParaTipo(evento.tipo).opacity(0.8)) // Color según el tipo
+                        .background(colorParaTipo(evento.tipo).opacity(0.8))
                         .clipShape(Capsule())
                     
                     Text(evento.nombre)
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary) // Usar color primario del sistema
+                        .foregroundColor(.primary)
                         .lineLimit(2)
                         .padding(.top, 4)
                 }
@@ -69,7 +68,7 @@ struct EventoRowView: View {
             .padding([.horizontal, .bottom])
             .padding(.top, 8)
             
-            // Indicador de si está unido (opcional)
+            // Indicador de si está unido
             if isUserRegistered {
                 HStack {
                     Spacer()
@@ -84,15 +83,15 @@ struct EventoRowView: View {
                 .padding(.bottom, 8)
             }
         }
-        .background(Color(UIColor.systemGray6)) // Un fondo sutil para la tarjeta
+        .background(Color(UIColor.systemGray6))
         .cornerRadius(15)
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
     }
 
-    // Funciones helper (puedes moverlas a un archivo de utilidades si se usan en más sitios)
+    // Funciones helper
     private func iconoParaTipo(_ tipo: String) -> String {
         switch tipo.lowercased() {
-        case "ambiental": return "leaf.arrow.triangle.circlepath" // Icono más dinámico
+        case "ambiental": return "leaf.arrow.triangle.circlepath" 
         case "social": return "heart.text.square.fill"
         case "educativo": return "books.vertical.fill"
         case "comunitario": return "person.3.sequence.fill"

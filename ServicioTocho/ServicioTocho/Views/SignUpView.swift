@@ -14,29 +14,24 @@ struct SignUpView: View {
     @State private var nombreCompleto = ""
     @State private var email = ""
     @State private var password = ""
-    // @State private var confirmPassword = "" // Sigue siendo opcional
-
-    // No necesitamos un init() para la barra de navegación aquí,
-    // ya que la barra es proporcionada por LoginView.
+    
 
     var body: some View {
-        ZStack { // ZStack para el color de fondo general
+        ZStack {
             Color.appBackground.edgesIgnoringSafeArea(.all)
 
             ScrollView {
-                VStack(spacing: 25) { // Espaciado general
-                    
-                    // Icono/Logo de la App (Placeholder)
+                VStack(spacing: 25) {
                     Image(systemName: "person.fill.badge.plus") // Icono para registro
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 70, height: 70) // Ligeramente más pequeño que el de Login
+                        .frame(width: 70, height: 70)
                         .foregroundColor(Color.accentColorTeal.opacity(0.8))
-                        .padding(.top, 30) // Menos padding superior que en Login
+                        .padding(.top, 30)
                         .padding(.bottom, 10)
 
                     Text("Crear Nueva Cuenta")
-                        .font(.title2) // Consistente con LoginView
+                        .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(Color.primary)
                         .padding(.bottom, 30)
@@ -50,8 +45,8 @@ struct SignUpView: View {
                             Image(systemName: "person.fill")
                                 .foregroundColor(Color.accentColorTeal)
                             TextField("Ingresa tu nombre completo", text: $nombreCompleto)
-                                .autocapitalization(.words) // Bueno para nombres
-                                .disableAutocorrection(false) // La autocorrección puede ser útil para nombres
+                                .autocapitalization(.words)
+                                .disableAutocorrection(false)
                         }
                         .padding(12)
                         .background(Color(UIColor.secondarySystemGroupedBackground))
@@ -123,23 +118,22 @@ struct SignUpView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.accentColorTeal) // Usar color de acento
+                            .background(Color.accentColorTeal)
                             .cornerRadius(10)
                             .shadow(color: Color.accentColorTeal.opacity(0.4), radius: 5, x: 0, y: 3)
                     }
                     .padding(.top, 10)
                     
-                    Spacer() // Para el contenido en pantallas grandes
+                    Spacer()
                 }
-                .padding(.horizontal, 30) // Padding horizontal para el contenido del VStack
+                .padding(.horizontal, 30)
             }
         }
-        .navigationTitle("Registro") // Este título se mostrará en la barra de LoginView
+        .navigationTitle("Registro")
         .navigationBarTitleDisplayMode(.inline)
-        // El botón "Atrás" será coloreado por el .accentColor de LoginView
         .onReceive(authViewModel.$userIsLoggedIn) { isLoggedIn in
             if isLoggedIn {
-                dismiss() // Cierra esta vista para volver a LoginView, que luego será reemplazada por AuthManagerView
+                dismiss()
             }
         }
     }
@@ -147,11 +141,9 @@ struct SignUpView: View {
 
 struct SignUpView_Previews: PreviewProvider {
     static var previews: some View {
-        // Para una preview correcta, ya que quitamos la NavView interna,
-        // es bueno embeberla en una para ver el título.
         NavigationView {
             SignUpView()
         }
-        .accentColor(Color.accentColorTeal) // Para que la preview muestre bien los acentos
+        .accentColor(Color.accentColorTeal) 
     }
 }

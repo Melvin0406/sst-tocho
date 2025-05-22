@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import FirebaseCore // Importa FirebaseCore
+import FirebaseCore 
 
 @main
 struct ServicioTochoApp: App {
@@ -24,7 +24,7 @@ struct ServicioTochoApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        FirebaseApp.configure() // Configura Firebase
+        FirebaseApp.configure() 
         return true
     }
 }

@@ -9,9 +9,8 @@ import SwiftUI
 
 struct RegistroDetalleView: View {
     let registroHora: RegistroHora
-    let evento: Evento // El evento asociado a este registro de horas
+    let evento: Evento
 
-    // Inicializador para configurar la apariencia de la barra de navegación
     init(registroHora: RegistroHora, evento: Evento) {
         self.registroHora = registroHora
         self.evento = evento
@@ -56,15 +55,12 @@ struct RegistroDetalleView: View {
 
                         DetailRow(iconName: registroHora.aprobado ? "checkmark.seal.fill" : "xmark.seal.fill",
                                   label: "Estado de Aprobación",
-                                  value: registroHora.aprobado ? "Aprobado" : "Pendiente/Rechazado") // Como es auto-aprobado, siempre será "Aprobado"
+                                  value: registroHora.aprobado ? "Aprobado" : "Pendiente/Rechazado")
                     }
                     .padding(20)
                     .background(Color(UIColor.secondarySystemGroupedBackground))
                     .cornerRadius(15)
                     .shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
-
-                    // Podrías añadir más información del evento aquí si es necesario,
-                    // aunque el foco es el registro de horas.
 
                     Spacer()
                 }

@@ -6,7 +6,7 @@
 //
 
 
-import FirebaseFirestore // Necesario para @DocumentID y Codable con Firestore
+import FirebaseFirestore 
 
 struct UserProfile: Identifiable, Codable, Equatable {
     @DocumentID var id: String?

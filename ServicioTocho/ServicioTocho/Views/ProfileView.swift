@@ -8,9 +8,9 @@ import SwiftUI
 
 struct ProfileView: View {
     @ObservedObject var authViewModel: AuthenticationViewModel
-    let todosLosEventos: [Evento] = mockEventos // Acceso a tus mockEventos
+    let todosLosEventos: [Evento] = mockEventos
 
-    // Eventos unidos para los cuales AÚN NO se han registrado horas
+    // Eventos unidos para los cuales aun no se han registrado horas
     var eventosParaRegistrarHoras: [Evento] {
         print("ProfileView: Calculando eventosParaRegistrarHoras...")
         guard let profile = authViewModel.userProfile,
@@ -27,7 +27,6 @@ struct ProfileView: View {
             guard let eventoID = evento.id else { return false }
             let estaRegistrado = registeredIDs.contains(eventoID)
             let yaLogueoHoras = idsEventosConHorasRegistradas.contains(eventoID)
-            // print("ProfileView: Checando evento '\(evento.nombre)' (\(eventoID)): estaRegistrado=\(estaRegistrado), yaLogueoHoras=\(yaLogueoHoras)")
             return estaRegistrado && !yaLogueoHoras
         }
         print("ProfileView: eventosParaRegistrarHoras count: \(eventosFiltrados.count)")
@@ -46,9 +45,9 @@ struct ProfileView: View {
             Color.appBackground.edgesIgnoringSafeArea(.all)
 
             ScrollView {
-                VStack(spacing: 30) { // Aumentar espaciado entre secciones principales
+                VStack(spacing: 30) {
                     // Sección del Cabezal del Perfil
-                    VStack(spacing: 10) { /* ... (como la tenías) ... */
+                    VStack(spacing: 10) {
                         Image(systemName: "person.crop.circle.fill")
                             .resizable().scaledToFit().frame(width: 100, height: 100)
                             .foregroundColor(Color.accentColorTeal.opacity(0.7)).padding(.top, 20)
@@ -58,10 +57,10 @@ struct ProfileView: View {
                         if let email = authViewModel.emailForProfile() {
                             Text(email).font(.callout).foregroundColor(.gray)
                         }
-                    }.padding(.bottom, 10) // Reducir padding inferior aquí
+                    }.padding(.bottom, 10)
 
                     // Tarjeta de Detalles del Usuario (Horas Acumuladas)
-                    VStack(alignment: .leading, spacing: 18) { /* ... (como la tenías) ... */
+                    VStack(alignment: .leading, spacing: 18) {
                         DetailRow(iconName: "hourglass.circle.fill",
                                   label: "Horas Acumuladas",
                                   value: String(format: "%.1f", authViewModel.userProfile?.horasAcumuladas ?? 0.0))
@@ -76,7 +75,7 @@ struct ProfileView: View {
                                                 .foregroundColor(Color.accentColorTeal)
                                             Text("Generar Reporte de Horas")
                                                 .fontWeight(.medium)
-                                                .foregroundColor(Color.primary) // O Color.accentColorTeal si quieres que el texto sea del color de acento
+                                                .foregroundColor(Color.primary)
                                             Spacer()
                                             Image(systemName: "chevron.right")
                                                 .foregroundColor(.secondary.opacity(0.7))
@@ -87,7 +86,7 @@ struct ProfileView: View {
                                         .padding(.horizontal)
                                     }
 
-                    // --- Sección: Eventos para Registrar Horas ---
+                    // Eventos para Registrar Horas
                     if !eventosParaRegistrarHoras.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Eventos para Registrar Horas")
@@ -99,7 +98,7 @@ struct ProfileView: View {
                                 NavigationLink(destination: LogHoursView(evento: evento, authViewModel: authViewModel)) {
                                     MiniEventoRow(evento: evento, conIconoChevron: true)
                                 }
-                                .padding(.horizontal) // Aplicar padding al NavigationLink
+                                .padding(.horizontal)
                             }
                         }
                     } else if authViewModel.userIsLoggedIn && authViewModel.misRegistrosDeHoras.isEmpty && authViewModel.userProfile?.registeredEventIDs?.isEmpty ?? true {
@@ -109,24 +108,21 @@ struct ProfileView: View {
                            .padding()
                     }
                     
-                    // --- Sección: Historial de Participación ---
+                    // Historial de Participación
                     if !authViewModel.misRegistrosDeHoras.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Historial de Participación")
                                 .font(.title3).fontWeight(.semibold)
                                 .foregroundColor(Color.primary)
-                                .padding([.horizontal, .top]) // Añadir .top aquí
+                                .padding([.horizontal, .top])
 
                             ForEach(authViewModel.misRegistrosDeHoras) { registroHora in
-                                // Necesitamos encontrar el evento correspondiente a este registroHora
                                 if let eventoAsociado = getEvento(byId: registroHora.idEvento) {
                                     NavigationLink(destination: RegistroDetalleView(registroHora: registroHora, evento: eventoAsociado)) {
                                         HistorialEventoRow(evento: eventoAsociado, registroHora: registroHora)
                                     }
                                     .padding(.horizontal)
                                 } else {
-                                    // Manejar caso donde el evento no se encuentra en mockData (no debería pasar con mockData)
-                                    // o si el idEvento en RegistroHora es nil
                                     Text("Detalles de evento no disponibles para un registro.")
                                         .font(.caption)
                                         .foregroundColor(.red)
@@ -143,7 +139,7 @@ struct ProfileView: View {
 
 
                     Spacer(minLength: 30)
-                    Button(action: { authViewModel.signOut() }) { /* ... (botón de sign out) ... */
+                    Button(action: { authViewModel.signOut() }) {
                         HStack {
                             Image(systemName: "arrow.left.square.fill")
                             Text("Cerrar Sesión")
@@ -170,15 +166,13 @@ struct ProfileView: View {
     }
 }
 
-// MiniEventoRow ajustada para poder o no mostrar el chevron
+
 struct MiniEventoRow: View {
     let evento: Evento
     var conIconoChevron: Bool = false
 
     var body: some View {
         HStack {
-            // Puedes añadir un icono de evento aquí si quieres
-            // Image(systemName: "calendar.badge.clock").foregroundColor(Color.accentColorTeal)
             VStack(alignment: .leading) {
                 Text(evento.nombre)
                     .font(.headline)
@@ -200,7 +194,7 @@ struct MiniEventoRow: View {
     }
 }
 
-// Nueva subvista para mostrar un evento en el historial de participación
+// Subvista para mostrar un evento en el historial de participación
 struct HistorialEventoRow: View {
     let evento: Evento
     let registroHora: RegistroHora
